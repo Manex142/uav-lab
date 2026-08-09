@@ -30,7 +30,11 @@ yarn-error.log*
 .idea/
 *.swp
 *.swo
+compile_commands.json
+.ros_headers/
+.clangd
 
 # OS generated files
 .DS_Store
 Thumbs.db
+
