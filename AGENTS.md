@@ -53,4 +53,6 @@ Follow **Conventional Commits** in English:
   - `feat(b1): add C++20 telemetry publisher node at 100 Hz`
   - `fix(b1): resolve QoS durability mismatch in subscriber node`
   - `docs(readme): update block 1 milestones`
-- **Language Policy:** **ALL** code, docstrings, commit messages, PRs, and GitHub issues MUST be written in **English**.
+- **Language Policy:** 
+  - All codebase assets, documentation, commit messages, PRs, and GitHub issues MUST be written in **English**.
+  - Interactive pair-programming responses and explanations should adapt to the developer's prompt language.
