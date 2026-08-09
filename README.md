@@ -48,5 +48,31 @@ Building upon a background in **Software Engineering and IoT**, this lab focuses
 
 ---
 
+## 🛠️ Quick Start & Build Workflow
+
+### Prerequisites
+* Docker & Docker Compose installed on the host system.
+
+### 1. Launch ROS2 Jazzy Container
+From the repository root on your host machine:
+```bash
+./docker/run.sh
+```
+
+### 2. Build Workspace
+Inside the interactive container environment (`/workspace`):
+```bash
+colcon build
+```
+
+### 3. Source Workspace Environment
+To register compiled ROS2 nodes and environment hooks in your active terminal session:
+```bash
+source install/setup.bash
+```
+
+---
+
 ## 📄 License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
