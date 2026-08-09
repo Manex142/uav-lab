@@ -2,7 +2,7 @@
 name: "🟩 Use Case"
 about: "Tangible deliverable or functional module within an epic"
 title: "[Short, clean Use Case Name]"
-labels: ["use-case"]
+labels: ["Use case"]
 assignees: ""
 ---
 

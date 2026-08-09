@@ -17,14 +17,14 @@ This document defines project metadata, standards, and workflow rules for AI ass
 
 ## 📋 GitHub Issues & Hierarchy Rules
 
-Issues follow a 3-tier hierarchy: **`Epic` $\rightarrow$ `Use Case` $\rightarrow$ `Task`**.
+Issues follow a 3-tier hierarchy: **`Epic` $\rightarrow$ `Use case` $\rightarrow$ `Task`**.
 
 1. **Titles must be CLEAN and natural** — Do NOT add noisy prefixes like `[EPIC-01]` or `[TASK-01.1]`.
    - ✅ `Block 1: ROS2 Middleware Core & C++`
    - ✅ `Basic Pub/Sub Telemetry Pipeline`
    - ✅ `Implement C++20 telemetry publisher node at 100 Hz`
 2. **Apply the corresponding type label:**
-   - Type labels: `epic`, `use-case`, `task`.
+   - Type labels: `Epic`, `Use case`, `Task`.
 3. **Always link newly created issues to GitHub Project Number `5` (`UAV Lab`).**
 
 ---
