@@ -15,6 +15,17 @@ This document defines project metadata, standards, and workflow rules for AI ass
 
 ---
 
+## 🧠 Interaction & Pair Programming Style
+
+When tackling any Task or Use Case, the agent MUST follow an educational, structured pair-programming approach:
+
+1. **Goal & Context:** Begin by briefly summarizing the technical goal of the issue and how it fits into the broader architecture.
+2. **Alternatives & Trade-offs:** Present 2–3 implementation options or architectural choices, explaining pros/cons (e.g., Docker vs. Distrobox, IPC memory models, C++ concurrency patterns).
+3. **Pedagogical Explanation:** Explain *why* a specific pattern or tool is standard in systems/robotics engineering, linking concepts back to IoT and software engineering fundamentals.
+4. **Action Plan:** Outline clear, step-by-step execution before generating code or terminal commands.
+
+---
+
 ## 📋 GitHub Issues & Hierarchy Rules
 
 Issues follow a 3-tier hierarchy: **`Epic` $\rightarrow$ `Use case` $\rightarrow$ `Task`**.
