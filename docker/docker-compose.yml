@@ -1,0 +1,27 @@
+name: uav-lab
+
+services:
+  ros2-jazzy:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      args:
+        USERNAME: manex
+        USER_UID: 1000
+        USER_GID: 1000
+    image: uav-lab:jazzy
+    container_name: uav_ros2_jazzy
+    network_mode: host
+    ipc: host
+    environment:
+      - DISPLAY=${DISPLAY}
+      - QT_QPA_PLATFORM=xcb
+      - QT_X11_NO_MITSHM=1
+      - NVIDIA_DRIVER_CAPABILITIES=all
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - ..:/workspace:rw
+    devices:
+      - /dev/dri:/dev/dri
+    stdin_open: true
+    tty: true
