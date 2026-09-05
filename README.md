@@ -10,41 +10,39 @@ Building upon a background in **Software Engineering and IoT**, this lab focuses
 
 ---
 
-## 🗺️ Roadmap & Epics
+## 🗺️ Roadmap & Epics (Pragmatic MVP)
 
-### 📌 `[EPIC-01] Block 1: ROS2 Middleware Core & C++ (Distributed Systems)`
-* **Objective:** Master ROS2 cyber-physical software architecture using C++20 and physical simulation in Gazebo Harmonic without relying on physical hardware.
-* **Core Competencies:** ROS2 Graph, Executors, Lifecycle Nodes, DDS Data Distribution Service (QoS policies, Zero-Copy shared memory IPC via `rclcpp`), URDF/Xacro kinematics, Gazebo Harmonic plugins.
+### 📌 `[EPIC-01] Block 1: ROS2 Middleware Core & Messaging Performance`
+* **Objective:** Master ROS2 cyber-physical software architecture, DDS QoS policies, and multi-threading execution in `rclcpp` using standard simulation models.
+* **Core Competencies:** ROS2 Graph, Executors, Multi-threaded Spinners, DDS QoS profiles (Reliable vs. Best Effort, Volatile vs. Transient Local), Latency benchmarking, Shared-Memory IPC (`rclcpp`).
 * **Key Deliverables:**
   * High-frequency (100 Hz) C++ Pub/Sub pipeline measuring DDS latency & QoS profiles.
-  * Differential Drive robot designed in URDF/Xacro, simulated in Gazebo, controlled via C++ velocity commands (`geometry_msgs/msg/Twist`) with real-time odometry feedback.
+  * Integration with standard Gazebo Harmonic robot models (PX4 X500 / TurtleBot3) controlled via ROS2 velocity topics (`geometry_msgs/msg/Twist`) while monitoring odometry.
 
 ---
 
-### 📌 `[EPIC-02] Block 2: Hardware Interfacing, Protocols & Edge Networking`
-* **Objective:** Bridge high-level software with physical hardware on Raspberry Pi 5, integrate UAV autopilots via SITL, and connect ROS2 with IoT/Cloud infrastructure.
-* **Core Competencies:** Linux low-level buses (I2C, SPI, UART, CAN), MAVLink protocol, PX4 Autopilot integration via Micro-XRCE-DDS agent, ROS2-to-MQTT/WebSockets bridging, WireGuard VPN tunneling.
+### 📌 `[EPIC-02] Block 2: Hardware Interfacing, Protocols & Go Edge Gateway (Core Focus)`
+* **Objective:** Bridge high-level edge software with PX4 SITL UAV autopilot, microservices, and secure Cloud IoT infrastructure using Go and ROS2.
+* **Core Competencies:** MAVLink protocol, Micro-XRCE-DDS Agent integration, Go (`Golang`) telemetry ingestion service, WireGuard encrypted VPN tunnels, Time-Series Storage (TimescaleDB).
 * **Key Deliverables:**
-  * C++ ROS2 node reading raw IMU sensor data via I2C on Raspberry Pi 5.
-  * **Remote Cyber-Physical Gateway:** PX4 running in SITL mode, ROS2 bridge streaming encrypted telemetry over WireGuard from Pi 5 to a Node.js/TS backend storing data in TimescaleDB with a real-time web UI.
+  * C++ ROS2 sensor telemetry parser node running on Raspberry Pi 5 / Edge environment.
+  * **Cyber-Physical Edge Gateway (Capstone Project):** PX4 running in SITL mode, ROS2 bridge streaming encrypted telemetry over WireGuard from Pi 5 to a **Go backend ingestion service**, storing real-time data in TimescaleDB with a live React web dashboard.
 
 ---
 
-### 📌 `[EPIC-03] Block 3: Computer Vision & Edge AI`
-* **Objective:** Implement real-time perception pipelines and Deep Learning inference running locally on low-power edge hardware (Raspberry Pi 5).
-* **Core Competencies:** Low-latency video pipelines using OpenCV and `image_transport`, C++ model execution with ONNX Runtime, FP32 to INT8/FP16 quantization (YOLOv8 / MobileNet), 3D target tracking & relative position estimation.
+### 📌 `[EPIC-03] Block 3: Computer Vision & Edge AI (Python Pipeline)`
+* **Objective:** Implement real-time perception pipelines and Deep Learning inference running on edge hardware via Python (`rclpy`).
+* **Core Competencies:** Python ROS2 nodes (`rclpy`), OpenCV video stream capture, Ultralytics YOLOv8 inference on Pi 5 / Edge CPU, target coordinate transformation, and ROS2 topic publishing.
 * **Key Deliverables:**
-  * C++ camera capture node applying OpenCV color/contour filters publishing 2D target coordinates.
-  * **Visual Target Tracker:** Quantized YOLO model executing in C++ on Pi 5, estimating target tracking vectors and issuing trajectory adjustments to the Gazebo simulator.
+  * `rclpy` camera node publishing target detections (`geometry_msgs/msg/Pose2D`) from live/simulated video streams to the ROS2 graph for downstream guidance.
 
 ---
 
-### 📌 `[EPIC-04] Block 4: State Estimation, SLAM & Autonomous Navigation`
-* **Objective:** Develop advanced autonomy algorithms for state estimation, mapping, and GPS-denied navigation, culminating in multi-agent robot coordination.
-* **Core Competencies:** Extended Kalman Filters (EKF) via `robot_localization` (IMU + Odometry), 2D/3D SLAM (SLAM Toolbox, ORB-SLAM3), Nav2 Stack (Costmaps, Planners, Controllers, Behavior Trees), Multi-robot systems (Namespaces, DDS domain isolation).
+### 📌 `[EPIC-04] Block 4: Autonomous Navigation & State Estimation (Single-Agent Autonomy)`
+* **Objective:** Implement GPS/Odometry-based single-agent waypoint navigation and state estimation without multi-robot complexity.
+* **Core Competencies:** EKF state estimation, Nav2 stack integration, Waypoint follow action servers, ROS2 action clients.
 * **Key Deliverables:**
-  * 2D occupancy grid mapping of a simulated Gazebo environment using SLAM Toolbox and teleoperation.
-  * **Multi-Agent Autonomous Navigation (Capstone Project):** Dual simulated robots navigating a warehouse environment, processing destination goals via external API, dynamically avoiding obstacles with Nav2, and coordinating routes.
+  * Autonomous single-agent navigation mission in a simulated Gazebo environment executing a sequence of waypoints received from the external Go API gateway.
 
 ---
 
