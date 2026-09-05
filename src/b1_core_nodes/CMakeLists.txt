@@ -24,8 +24,20 @@ ament_target_dependencies(telemetry_publisher
   geometry_msgs
 )
 
+add_executable(telemetry_subscriber src/telemetry_subscriber.cpp)
+target_include_directories(telemetry_subscriber PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
+)
+target_compile_features(telemetry_subscriber PUBLIC cxx_std_20)
+ament_target_dependencies(telemetry_subscriber
+  rclcpp
+  geometry_msgs
+)
+
 install(TARGETS
   telemetry_publisher
+  telemetry_subscriber
   DESTINATION lib/${PROJECT_NAME}
 )
 
