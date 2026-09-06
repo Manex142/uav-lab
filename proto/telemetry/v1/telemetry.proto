@@ -1,0 +1,79 @@
+syntax = "proto3";
+
+package telemetry.v1;
+
+option go_package = "github.com/Manex142/uav-lab/pkg/telemetry/v1;telemetryv1";
+
+// 3D Cartesian vector in standard SI units (meters or meters per second).
+message Vector3 {
+  double x = 1;
+  double y = 2;
+  double z = 3;
+}
+
+// Orientation quaternion following Hamilton convention (w + xi + yj + zk).
+message Quaternion {
+  double w = 1;
+  double x = 2;
+  double y = 3;
+  double z = 4;
+}
+
+// Attitude orientation represented in Tait-Bryan Euler angles (radians).
+message EulerAngles {
+  double roll = 1;   // Rotation around X axis (radians, [-pi, pi])
+  double pitch = 2;  // Rotation around Y axis (radians, [-pi/2, pi/2])
+  double yaw = 3;    // Rotation around Z axis (radians, [-pi, pi])
+}
+
+// Battery power and health metrics.
+message BatteryState {
+  float voltage_v = 1;       // Terminal voltage in Volts (e.g. 15.2V for 4S LiPo)
+  float current_a = 2;       // Instantaneous current draw in Amperes
+  float percentage = 3;      // Remaining capacity ratio [0.0 - 1.0]
+  float temperature_c = 4;   // Battery cell temperature in Celsius
+}
+
+// Operational autopilot flight modes (compatible with PX4 and ROS2 autonomy).
+enum FlightMode {
+  FLIGHT_MODE_UNSPECIFIED = 0;
+  FLIGHT_MODE_MANUAL = 1;
+  FLIGHT_MODE_ALTITUDE_HOLD = 2;
+  FLIGHT_MODE_POSITION_HOLD = 3;
+  FLIGHT_MODE_AUTO_MISSION = 4;
+  FLIGHT_MODE_AUTO_RTL = 5;      // Return To Launch
+  FLIGHT_MODE_AUTO_LAND = 6;
+  FLIGHT_MODE_OFFBOARD = 7;       // Companion computer setpoint control
+}
+
+// Overall UAV hardware and subsystem health state.
+enum SystemStatus {
+  SYSTEM_STATUS_UNSPECIFIED = 0;
+  SYSTEM_STATUS_BOOTING = 1;
+  SYSTEM_STATUS_CALIBRATING = 2;
+  SYSTEM_STATUS_STANDBY = 3;
+  SYSTEM_STATUS_ACTIVE = 4;
+  SYSTEM_STATUS_CRITICAL = 5;
+  SYSTEM_STATUS_EMERGENCY = 6;
+}
+
+// UAV Telemetry record broadcasted at high frequencies (up to 100 Hz).
+message TelemetryRecord {
+  // --- Header & Synchronization ---
+  string device_id = 1;          // Unique UAV identifier (e.g. "uav-alpha-01")
+  uint64 sequence_number = 2;    // Monotonically increasing datagram counter
+  int64 timestamp_ns = 3;        // Unix epoch timestamp in nanoseconds captured at edge
+
+  // --- Kinematics & Spatial State ---
+  Vector3 position = 4;          // 3D position (X=North, Y=East, Z=Down / ENU in meters)
+  Quaternion orientation = 5;    // Attitude quaternion
+  EulerAngles euler_angles = 6;  // Attitude in Euler angles (radians)
+  Vector3 linear_velocity = 7;   // Linear velocity vector (m/s)
+  Vector3 angular_velocity = 8;  // Angular velocity / body rates (rad/s)
+
+  // --- Autopilot & Power State ---
+  bool armed = 9;                // True when propulsion motors are active
+  FlightMode flight_mode = 10;   // Current flight mode
+  SystemStatus system_status = 11; // Overall health/system status
+  BatteryState battery = 12;     // Battery telemetry
+}
