@@ -10,26 +10,21 @@ ROOT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 echo "==> Compiling Protocol Buffers from ${ROOT_DIR}/proto..."
 
 # 1. Generate Go code
-mkdir -p "${ROOT_DIR}/pkg/telemetry/v1"
+mkdir -p "${ROOT_DIR}/gen/go/telemetry/v1"
 protoc \
   --proto_path="${ROOT_DIR}/proto" \
   --go_out="${ROOT_DIR}" \
   --go_opt=module=github.com/Manex142/uav-lab \
   "${ROOT_DIR}/proto/telemetry/v1/telemetry.proto"
 
-# 2. Generate Python code
-mkdir -p "${ROOT_DIR}/pkg/telemetry/v1/python"
-touch "${ROOT_DIR}/pkg/telemetry/v1/python/__init__.py"
+# 2. Generate Python code (for testing / Python scripts)
+mkdir -p "${ROOT_DIR}/gen/python/telemetry/v1"
+touch "${ROOT_DIR}/gen/python/__init__.py"
+touch "${ROOT_DIR}/gen/python/telemetry/__init__.py"
+touch "${ROOT_DIR}/gen/python/telemetry/v1/__init__.py"
 protoc \
   --proto_path="${ROOT_DIR}/proto" \
-  --python_out="${ROOT_DIR}/pkg/telemetry/v1/python" \
+  --python_out="${ROOT_DIR}/gen/python" \
   "${ROOT_DIR}/proto/telemetry/v1/telemetry.proto"
 
-# 3. Generate C++ code
-mkdir -p "${ROOT_DIR}/src/b1_core_nodes/include/proto"
-protoc \
-  --proto_path="${ROOT_DIR}/proto" \
-  --cpp_out="${ROOT_DIR}/src/b1_core_nodes/include/proto" \
-  "${ROOT_DIR}/proto/telemetry/v1/telemetry.proto"
-
-echo "==> Successfully generated Protobuf bindings for Go, Python, and C++."
+echo "==> Successfully generated Protobuf bindings in ${ROOT_DIR}/gen/."

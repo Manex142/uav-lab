@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package telemetry.v1;
 
-option go_package = "github.com/Manex142/uav-lab/pkg/telemetry/v1;telemetryv1";
+option go_package = "github.com/Manex142/uav-lab/gen/go/telemetry/v1;telemetryv1";
 
 // 3D Cartesian vector in standard SI units (meters or meters per second).
 message Vector3 {

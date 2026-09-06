@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	telemetryv1 "github.com/Manex142/uav-lab/pkg/telemetry/v1"
+	telemetryv1 "github.com/Manex142/uav-lab/gen/go/telemetry/v1"
 	"google.golang.org/protobuf/proto"
 )
 

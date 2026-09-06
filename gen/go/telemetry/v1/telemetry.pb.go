@@ -602,7 +602,7 @@ const file_telemetry_v1_telemetry_proto_rawDesc = "" +
 	"\x15SYSTEM_STATUS_STANDBY\x10\x03\x12\x18\n" +
 	"\x14SYSTEM_STATUS_ACTIVE\x10\x04\x12\x1a\n" +
 	"\x16SYSTEM_STATUS_CRITICAL\x10\x05\x12\x1b\n" +
-	"\x17SYSTEM_STATUS_EMERGENCY\x10\x06B:Z8github.com/Manex142/uav-lab/pkg/telemetry/v1;telemetryv1b\x06proto3"
+	"\x17SYSTEM_STATUS_EMERGENCY\x10\x06B=Z;github.com/Manex142/uav-lab/gen/go/telemetry/v1;telemetryv1b\x06proto3"
 
 var (
 	file_telemetry_v1_telemetry_proto_rawDescOnce sync.Once
