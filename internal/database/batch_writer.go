@@ -64,11 +64,11 @@ func DefaultBatchWriterConfig() BatchWriterConfig {
 
 // BatchWriterStats exposes operational metrics for observability and benchmarking.
 type BatchWriterStats struct {
-	RecordsEnqueued uint64
+	RecordsEnqueued  uint64
 	RecordsPersisted uint64
-	RecordsDropped  uint64
-	FlushesCount    uint64
-	FlushErrors     uint64
+	RecordsDropped   uint64
+	FlushesCount     uint64
+	FlushErrors      uint64
 }
 
 // BatchWriter buffers incoming UAV telemetry and writes batches using pgx.CopyFrom.

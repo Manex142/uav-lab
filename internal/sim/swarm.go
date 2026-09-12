@@ -16,15 +16,15 @@ import (
 
 // SwarmConfig defines parameters for multi-UAV synthetic workload generation.
 type SwarmConfig struct {
-	DroneCount    int           // Total number of concurrent UAV simulators
-	TargetAddr    string        // Destination UDP address (e.g. 127.0.0.1:9876)
-	FrequencyHz   int           // Telemetry frequency per drone in Hz (e.g. 100)
-	EnableJitter  bool          // Stagger initial emissions to avoid micro-bursting
-	MinRadius     float64       // Minimum orbit radius (meters)
-	MaxRadius     float64       // Maximum orbit radius (meters)
-	MinSpeed      float64       // Minimum horizontal cruise speed (m/s)
-	MaxSpeed      float64       // Maximum horizontal cruise speed (m/s)
-	BaseAltitude  float64       // Base flight altitude (meters)
+	DroneCount   int     // Total number of concurrent UAV simulators
+	TargetAddr   string  // Destination UDP address (e.g. 127.0.0.1:9876)
+	FrequencyHz  int     // Telemetry frequency per drone in Hz (e.g. 100)
+	EnableJitter bool    // Stagger initial emissions to avoid micro-bursting
+	MinRadius    float64 // Minimum orbit radius (meters)
+	MaxRadius    float64 // Maximum orbit radius (meters)
+	MinSpeed     float64 // Minimum horizontal cruise speed (m/s)
+	MaxSpeed     float64 // Maximum horizontal cruise speed (m/s)
+	BaseAltitude float64 // Base flight altitude (meters)
 }
 
 // DefaultSwarmConfig returns production-tested defaults for load testing.
@@ -44,9 +44,9 @@ func DefaultSwarmConfig() SwarmConfig {
 
 // SwarmMetrics tracks aggregated real-time transmission statistics.
 type SwarmMetrics struct {
-	PacketsSent    atomic.Uint64
-	BytesSent      atomic.Uint64
-	NetworkErrors  atomic.Uint64
+	PacketsSent   atomic.Uint64
+	BytesSent     atomic.Uint64
+	NetworkErrors atomic.Uint64
 }
 
 // Swarm manages a fleet of concurrent simulated drones.

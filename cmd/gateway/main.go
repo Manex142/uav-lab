@@ -11,11 +11,11 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/jackc/pgx/v5/pgxpool"
 	telemetryv1 "github.com/Manex142/uav-lab/gen/go/telemetry/v1"
 	"github.com/Manex142/uav-lab/internal/database"
 	"github.com/Manex142/uav-lab/internal/ingest"
 	"github.com/Manex142/uav-lab/internal/ledger"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 func main() {

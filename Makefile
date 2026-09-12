@@ -8,7 +8,7 @@ DOCKER_COMPOSE := docker compose -f docker/docker-compose.yml
 
 MIGRATIONS_DIR := internal/database/migrations
 
-.PHONY: all help dev sim swarm db-up db-down db-logs test bench build clean tidy migration
+.PHONY: all help dev sim swarm db-up db-down db-logs test bench benchmark report build clean tidy migration
 
 all: test build
 
@@ -62,6 +62,18 @@ test:
 ## bench: Run Go performance benchmarks with memory allocations
 bench:
 	go test -v -bench=. -benchmem ./...
+
+## benchmark: Run automated benchmark matrix (e.g. make benchmark duration=5 note="baseline" tag="b1")
+benchmark:
+	bash scripts/run_benchmarks.sh $(if $(duration),--duration=$(duration)) $(if $(note),--note="$(note)") $(if $(tag),--tag="$(tag)")
+
+## report: Regenerate report and SVGs from benchmark JSON (e.g. make report json=benchmarks/runs/20260912_173433_baseline/benchmark.json)
+report:
+	@if [ -z "$(json)" ]; then \
+		echo "❌ Error: Specify JSON path (e.g. make report json=benchmarks/runs/.../benchmark.json)"; \
+		exit 1; \
+	fi
+	go run ./scripts/report/main.go $(json) $(if $(out),$(out),$(dir $(json)))
 
 ## tidy: Format code and tidy Go module dependencies
 tidy:
