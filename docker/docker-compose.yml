@@ -25,3 +25,24 @@ services:
       - /dev/dri:/dev/dri
     stdin_open: true
     tty: true
+
+  timescaledb:
+    image: timescale/timescaledb:latest-pg16
+    container_name: uav_timescaledb
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=uav_telemetry
+      - POSTGRES_USER=uav_admin
+      - POSTGRES_PASSWORD=uav_password
+    volumes:
+      - timescale_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U uav_admin -d uav_telemetry"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  timescale_data:
