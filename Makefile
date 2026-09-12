@@ -8,7 +8,7 @@ DOCKER_COMPOSE := docker compose -f docker/docker-compose.yml
 
 MIGRATIONS_DIR := internal/database/migrations
 
-.PHONY: all help dev sim db-up db-down db-logs test bench build clean tidy migration
+.PHONY: all help dev sim swarm db-up db-down db-logs test bench build clean tidy migration
 
 all: test build
 
@@ -23,9 +23,13 @@ help:
 dev:
 	go run ./cmd/gateway
 
-## sim: Run the single-drone synthetic telemetry simulator (100 Hz)
+## sim: Run single-drone synthetic telemetry simulator (100 Hz)
 sim:
-	go run ./cmd/simulator
+	go run ./cmd/simulator -drones=1 -frequency=100
+
+## swarm: Run concurrent drone swarm simulator (e.g. make swarm drones=50 hz=100)
+swarm:
+	go run ./cmd/simulator -drones=$(if $(drones),$(drones),20) -frequency=$(if $(hz),$(hz),100)
 
 ## db-up: Start TimescaleDB container in background
 db-up:
