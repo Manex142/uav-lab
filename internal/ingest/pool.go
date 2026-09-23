@@ -30,6 +30,7 @@ type WorkerPool struct {
 	seqMu      sync.Mutex
 	lastSeqMap map[string]uint64
 	lossCount  uint64
+	onLoss     func(deviceID string, expectedStart, expectedEnd, missed uint64)
 }
 
 // NewWorkerPool inicializa el pool de trabajadores concurrentes.
@@ -120,6 +121,13 @@ func (p *WorkerPool) processPacket(payload []byte) {
 	}
 }
 
+// SetOnPacketLoss configura un callback opcional cuando se detecta pérdida de paquetes.
+func (p *WorkerPool) SetOnPacketLoss(cb func(deviceID string, expectedStart, expectedEnd, missed uint64)) {
+	p.seqMu.Lock()
+	defer p.seqMu.Unlock()
+	p.onLoss = cb
+}
+
 // checkSequence verifica si el número de secuencia recibido es consecutivo.
 // Si hay un salto (ej: llega 105 tras 102), significa que 3 paquetes se perdieron en UDP.
 func (p *WorkerPool) checkSequence(deviceID string, seq uint64) {
@@ -131,8 +139,12 @@ func (p *WorkerPool) checkSequence(deviceID string, seq uint64) {
 		if seq > lastSeq+1 {
 			missed := seq - (lastSeq + 1)
 			p.lossCount += missed
-			log.Printf("[Red UDP] ⚠️ Paquetes perdidos en el aire para %s: se esperaban %d..%d (%d perdidos)",
-				deviceID, lastSeq+1, seq-1, missed)
+			if p.onLoss != nil {
+				p.onLoss(deviceID, lastSeq+1, seq-1, missed)
+			} else {
+				log.Printf("[Red UDP] ⚠️ Paquetes perdidos en el aire para %s: se esperaban %d..%d (%d perdidos)",
+					deviceID, lastSeq+1, seq-1, missed)
+			}
 		}
 	}
 	p.lastSeqMap[deviceID] = seq

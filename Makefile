@@ -23,6 +23,10 @@ help:
 dev:
 	go run ./cmd/uav gateway
 
+## monitor: Run the interactive TUI telemetry dashboard
+monitor:
+	go run ./cmd/uav monitor
+
 ## sim: Run single-drone synthetic telemetry simulator (100 Hz)
 sim:
 	go run ./cmd/uav sim --drones=1 --frequency=100

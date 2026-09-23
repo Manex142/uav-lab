@@ -35,4 +35,5 @@ func init() {
 	rootCmd.AddCommand(newGatewayCmd())
 	rootCmd.AddCommand(newSimCmd())
 	rootCmd.AddCommand(newDBCmd())
+	rootCmd.AddCommand(newMonitorCmd())
 }
