@@ -21,15 +21,15 @@ help:
 
 ## dev: Run the high-throughput telemetry gateway
 dev:
-	go run ./cmd/gateway
+	go run ./cmd/uav gateway
 
 ## sim: Run single-drone synthetic telemetry simulator (100 Hz)
 sim:
-	go run ./cmd/simulator -drones=1 -frequency=100
+	go run ./cmd/uav sim --drones=1 --frequency=100
 
 ## swarm: Run concurrent drone swarm simulator (e.g. make swarm drones=50 hz=100)
 swarm:
-	go run ./cmd/simulator -drones=$(if $(drones),$(drones),20) -frequency=$(if $(hz),$(hz),100)
+	go run ./cmd/uav sim --drones=$(if $(drones),$(drones),20) --frequency=$(if $(hz),$(hz),100)
 
 ## db-up: Start TimescaleDB container in background
 db-up:
@@ -80,12 +80,11 @@ tidy:
 	go fmt ./...
 	go mod tidy
 
-## build: Compile native binaries for gateway and simulator into bin/
+## build: Compile native unified uav CLI binary into bin/
 build:
 	@mkdir -p $(BIN_DIR)
-	go build -o $(BIN_DIR)/gateway ./cmd/gateway
-	go build -o $(BIN_DIR)/simulator ./cmd/simulator
-	@echo "✅ Binaries compiled to $(BIN_DIR)/"
+	go build -o $(BIN_DIR)/uav ./cmd/uav
+	@echo "✅ Unified CLI binary compiled to $(BIN_DIR)/uav"
 
 ## clean: Remove compiled binaries and build artifacts
 clean:

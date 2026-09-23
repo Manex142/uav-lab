@@ -131,12 +131,12 @@ for SCENARIO in "${SCENARIOS[@]}"; do
     SIM_LOG="$TMP_DIR/sim.log"
 
     # Start Gateway in background
-    ./bin/gateway --db-name="$BENCH_DB" --listen-addr="$TARGET_ADDR" > "$GW_LOG" 2>&1 &
+    ./bin/uav gateway --db-name="$BENCH_DB" --listen-addr="$TARGET_ADDR" > "$GW_LOG" 2>&1 &
     GW_PID=$!
     sleep 1.2
 
     # Start Swarm Generator in background
-    ./bin/simulator --target-addr="$TARGET_ADDR" --drones="$DRONES" --frequency="$FREQ" > "$SIM_LOG" 2>&1 &
+    ./bin/uav sim --target-addr="$TARGET_ADDR" --drones="$DRONES" --frequency="$FREQ" > "$SIM_LOG" 2>&1 &
     SIM_PID=$!
 
     # Run for requested duration
