@@ -23,6 +23,14 @@ help:
 dev:
 	go run ./cmd/uav gateway
 
+## web-dev: Run the Vite React frontend development server
+web-dev:
+	npm --prefix web run dev
+
+## web-build: Compile the React frontend assets into web/dist
+web-build:
+	npm --prefix web run build
+
 ## monitor: Run the interactive TUI telemetry dashboard
 monitor:
 	go run ./cmd/uav monitor
