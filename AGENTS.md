@@ -38,6 +38,11 @@ Issues follow a 3-tier hierarchy: **`Epic` $\rightarrow$ `Use case` $\rightarrow
 2. **Apply the corresponding type label:**
    - Type labels: `Epic`, `Use case`, `Task`.
 3. **Always link newly created issues to GitHub Project Number `5` (`UAV Lab`).**
+4. **Always link child issues to their parent issue:**
+   - **Native GitHub Sub-Issues:** Every `Use case` must be linked as a sub-issue of its parent `Epic`, and every `Task` must be linked as a sub-issue of its parent `Use case` via GitHub GraphQL (`addSubIssue` mutation) so progress bars and hierarchy show up in the web UI.
+   - **Markdown References:** 
+     - Child issues must explicitly declare their parent at the top of the body (e.g., `Parent Epic: #<number>` or `Parent Use case: #<number>`).
+     - Parent issues must track their children in a markdown checklist (e.g., `- [ ] #<number> <Title>`).
 
 ---
 
