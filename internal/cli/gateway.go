@@ -14,6 +14,7 @@ import (
 	"github.com/Manex142/uav-lab/internal/database"
 	"github.com/Manex142/uav-lab/internal/ingest"
 	"github.com/Manex142/uav-lab/internal/ledger"
+	"github.com/Manex142/uav-lab/internal/server"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/spf13/cobra"
 )
@@ -34,6 +35,12 @@ type gatewayOptions struct {
 	persistEnable bool
 	batchSize     int
 	flushInterval time.Duration
+
+	webEnable   bool
+	httpAddr    string
+	wsFrequency int
+	homeLat     float64
+	homeLon     float64
 }
 
 func newGatewayCmd() *cobra.Command {
@@ -43,7 +50,8 @@ func newGatewayCmd() *cobra.Command {
 		Use:   "gateway",
 		Short: "Start the high-throughput telemetry ingestion gateway",
 		Long: `Start the UDP telemetry ingestion gateway with parallel worker pools,
-in-memory device ledger, liveness monitoring, and batch persistence to TimescaleDB.`,
+in-memory device ledger, liveness monitoring, batch persistence to TimescaleDB,
+and real-time HTTP/WebSocket streaming for web dashboards.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runGateway(opts)
 		},
@@ -66,6 +74,12 @@ in-memory device ledger, liveness monitoring, and batch persistence to Timescale
 	flags.IntVar(&opts.batchSize, "batch-size", 1000, "Tamaño de lote para pgx.CopyFrom")
 	flags.DurationVar(&opts.flushInterval, "flush-interval", 100*time.Millisecond, "Intervalo temporal de volcado a base de datos")
 
+	flags.BoolVar(&opts.webEnable, "web", true, "Habilitar servidor HTTP y WebSocket de streaming para el dashboard")
+	flags.StringVar(&opts.httpAddr, "http-addr", ":8080", "Dirección y puerto de escucha HTTP/WebSocket")
+	flags.IntVar(&opts.wsFrequency, "ws-hz", 10, "Frecuencia de refresco WebSocket para clientes web (Hz)")
+	flags.Float64Var(&opts.homeLat, "home-lat", server.DefaultHomeLat, "Latitud de origen para proyección geográfica (WGS84)")
+	flags.Float64Var(&opts.homeLon, "home-lon", server.DefaultHomeLon, "Longitud de origen para proyección geográfica (WGS84)")
+
 	return cmd
 }
 
@@ -83,6 +97,11 @@ func runGateway(opts *gatewayOptions) error {
 			opts.dbHost, opts.dbPort, opts.dbName, opts.batchSize, opts.flushInterval)
 	} else {
 		fmt.Println(" Persistencia BD: DESACTIVADA")
+	}
+	if opts.webEnable {
+		fmt.Printf(" Servidor Web   : ACTIVO en http://localhost%s (WS: /ws/telemetry @ %d Hz)\n", opts.httpAddr, opts.wsFrequency)
+	} else {
+		fmt.Println(" Servidor Web   : DESACTIVADO")
 	}
 	fmt.Println(" Presiona [Ctrl+C] para apagar el servidor.")
 	fmt.Println("----------------------------------------------------------------")
@@ -130,11 +149,35 @@ func runGateway(opts *gatewayOptions) error {
 	}
 
 	metrics := &ingest.Metrics{}
-
 	registry := ledger.NewDeviceRegistry()
+
+	var webServer *server.Server
+	if opts.webEnable {
+		srvCfg := server.ServerConfig{
+			ListenAddr: opts.httpAddr,
+			HubConfig: server.HubConfig{
+				BroadcastHz:   opts.wsFrequency,
+				HomeLatitude:  opts.homeLat,
+				HomeLongitude: opts.homeLon,
+			},
+		}
+		webServer = server.NewServer(srvCfg, registry, metrics)
+		if err := webServer.Start(); err != nil {
+			return fmt.Errorf("error crítico arrancando servidor Web: %w", err)
+		}
+	}
+
 	registry.SetCallbacks(ledger.ConnectionCallbacks{
 		OnDiscovered: func(deviceID string, firstSeen time.Time) {
 			log.Printf("🟢 [LEDGER] NUEVO DRON DESCUBIERTO: '%s' registrado en el espacio aéreo", deviceID)
+			if webServer != nil {
+				webServer.Hub().BroadcastEvent(server.LifecycleEventMessage{
+					Type:      "LIFECYCLE_EVENT",
+					Timestamp: firstSeen.UnixMilli(),
+					Event:     "DISCOVERED",
+					DeviceID:  deviceID,
+				})
+			}
 			if dbPool != nil {
 				go func() {
 					ctxEvt, cancelEvt := context.WithTimeout(context.Background(), 2*time.Second)
@@ -150,6 +193,14 @@ func runGateway(opts *gatewayOptions) error {
 		OnLost: func(deviceID string, lastSeen time.Time) {
 			log.Printf("🔴 [LEDGER] ⚠️ CONEXIÓN PERDIDA: Dron '%s' sin telemetría (última señal hace >%v a las %s)",
 				deviceID, opts.heartbeatTimeout, lastSeen.Format("15:04:05.000"))
+			if webServer != nil {
+				webServer.Hub().BroadcastEvent(server.LifecycleEventMessage{
+					Type:      "LIFECYCLE_EVENT",
+					Timestamp: time.Now().UnixMilli(),
+					Event:     "LOST",
+					DeviceID:  deviceID,
+				})
+			}
 			if dbPool != nil {
 				go func() {
 					ctxEvt, cancelEvt := context.WithTimeout(context.Background(), 2*time.Second)
@@ -165,6 +216,14 @@ func runGateway(opts *gatewayOptions) error {
 		},
 		OnRestored: func(deviceID string, resumedAt time.Time) {
 			log.Printf("🔄 [LEDGER] ENLACE RESTAURADO: Dron '%s' vuelve a transmitir telemetría", deviceID)
+			if webServer != nil {
+				webServer.Hub().BroadcastEvent(server.LifecycleEventMessage{
+					Type:      "LIFECYCLE_EVENT",
+					Timestamp: resumedAt.UnixMilli(),
+					Event:     "RESTORED",
+					DeviceID:  deviceID,
+				})
+			}
 			if dbPool != nil {
 				go func() {
 					ctxEvt, cancelEvt := context.WithTimeout(context.Background(), 2*time.Second)
@@ -220,6 +279,12 @@ func runGateway(opts *gatewayOptions) error {
 			listener.Stop()
 			livenessMonitor.Stop()
 			pool.Stop()
+			if webServer != nil {
+				fmt.Println("   Deteniendo servidor HTTP/WebSocket...")
+				ctxShutdown, cancelShutdown := context.WithTimeout(context.Background(), 2*time.Second)
+				_ = webServer.Shutdown(ctxShutdown)
+				cancelShutdown()
+			}
 			if batchWriter != nil {
 				fmt.Println("   Vaciando buffer de telemetría a TimescaleDB...")
 				batchWriter.Close()
@@ -259,19 +324,25 @@ func runGateway(opts *gatewayOptions) error {
 				dbStatus = fmt.Sprintf(" | BD Persist: %d (%d flushes)", bwStats.RecordsPersisted, bwStats.FlushesCount)
 			}
 
+			var wsStatus string
+			if webServer != nil {
+				wsStatus = fmt.Sprintf(" | WS Clientes: %d", webServer.Hub().ClientCount())
+			}
+
 			if snap.PacketsReceived > 0 {
-				fmt.Printf("[Gateway] Ingesta: %5.1f Hz | %6.2f KB/s | Latencia: %5.3f ms | Drones ONLINE: %d%s | Último: %s (seq=%-6d) | Drops: %d\n",
+				fmt.Printf("[Gateway] Ingesta: %5.1f Hz | %6.2f KB/s | Latencia: %5.3f ms | Drones ONLINE: %d%s%s | Último: %s (seq=%-6d) | Drops: %d\n",
 					currentHz,
 					currentKBps,
 					snap.AvgLatencyMs,
 					activeDrones,
 					dbStatus,
+					wsStatus,
 					latestDeviceID,
 					latestSeq,
 					snap.PacketsDropped,
 				)
 			} else {
-				fmt.Printf("[Gateway] Esperando datagramas UDP en %s... (Drones ONLINE: %d%s)\n", opts.listenAddr, activeDrones, dbStatus)
+				fmt.Printf("[Gateway] Esperando datagramas UDP en %s... (Drones ONLINE: %d%s%s)\n", opts.listenAddr, activeDrones, dbStatus, wsStatus)
 			}
 
 			prevPackets = snap.PacketsReceived
