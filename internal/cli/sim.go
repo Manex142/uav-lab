@@ -39,9 +39,9 @@ emitting Protocol Buffers over UDP with orbital motion kinematics and jitter.`,
 	flags.StringVarP(&opts.targetAddr, "target-addr", "t", "127.0.0.1:9876", "Dirección UDP destino (host:port)")
 	flags.IntVarP(&opts.frequencyHz, "frequency", "f", 100, "Frecuencia de emisión por dron en Hz")
 	flags.BoolVar(&opts.enableJitter, "jitter", true, "Desfasar el arranque para evitar micro-bursting")
-	flags.Float64Var(&opts.radius, "radius", 30.0, "Radio base de la órbita (metros)")
-	flags.Float64Var(&opts.speed, "speed", 7.0, "Velocidad base de crucero (m/s)")
-	flags.Float64Var(&opts.altitude, "altitude", 25.0, "Altitud base de vuelo (metros)")
+	flags.Float64Var(&opts.radius, "radius", 120.0, "Radio base de la órbita (metros)")
+	flags.Float64Var(&opts.speed, "speed", 10.0, "Velocidad base de crucero (m/s)")
+	flags.Float64Var(&opts.altitude, "altitude", 35.0, "Altitud base de vuelo (metros)")
 
 	return cmd
 }
