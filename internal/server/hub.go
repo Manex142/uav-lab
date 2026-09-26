@@ -269,13 +269,18 @@ func (h *Hub) buildFleetSnapshot(now time.Time) []DeviceTelemetryDTO {
 	metersPerDegreeLon := MetersPerDegreeLat * math.Cos(h.cfg.HomeLatitude*(math.Pi/180.0))
 
 	for _, d := range rawDevices {
+		lastSeenMs := now.Sub(d.LastSeen).Milliseconds()
+		if lastSeenMs < 0 {
+			lastSeenMs = 0
+		}
+
 		dto := DeviceTelemetryDTO{
 			ID:             d.DeviceID,
 			Status:         string(d.Status),
 			SequenceNumber: d.SequenceNumber,
 			Armed:          d.Armed,
 			FlightMode:     d.FlightMode.String(),
-			LastSeenMs:     now.Sub(d.LastSeen).Milliseconds(),
+			LastSeenMs:     lastSeenMs,
 		}
 
 		if d.Position != nil {

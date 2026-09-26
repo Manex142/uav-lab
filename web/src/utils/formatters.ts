@@ -2,24 +2,27 @@
  * Formats an elapsed millisecond duration into a clean, human-readable relative time string.
  *
  * Rules:
- * - Active online stream (< 1s): "LIVE"
+ * - Active online stream (< 1.5s): "LIVE" (rock-solid, no clock jitter or negative ms flicker)
  * - Under 1 min (< 60s): e.g. "14s ago"
  * - Under 1 hour (< 60m): e.g. "2m 15s ago"
  * - Under 1 day (< 24h): e.g. "1h 22m ago"
  * - 1 day or more: e.g. "2d 4h ago"
  */
 export function formatLastSeen(ms: number, isOnline = true): string {
-  if (ms < 0) return 'Just now';
-
-  // If asset is actively streaming online within 1 second, show sleek "LIVE" status
-  if (isOnline && ms < 1000) {
+  // If asset is actively streaming online, any recent timestamp is LIVE
+  if (isOnline && ms < 1500) {
     return 'LIVE';
   }
 
-  const totalSeconds = Math.floor(ms / 1000);
+  const nonNegativeMs = Math.max(0, ms);
+  const totalSeconds = Math.floor(nonNegativeMs / 1000);
+
+  if (totalSeconds < 1) {
+    return isOnline ? 'LIVE' : 'Just now';
+  }
 
   if (totalSeconds < 60) {
-    return `${Math.max(1, totalSeconds)}s ago`;
+    return `${totalSeconds}s ago`;
   }
 
   const minutes = Math.floor(totalSeconds / 60);
