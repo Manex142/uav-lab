@@ -35,6 +35,16 @@ export const TacticalMap: FC<TacticalMapProps> = ({
     iconCircle: HTMLElement;
     arrowSvg: SVGElement;
     lastAngle: number;
+
+    // LERP (Linear Interpolation) state for 60 FPS smooth motion
+    fromLng: number;
+    fromLat: number;
+    targetLng: number;
+    targetLat: number;
+    currentLng: number;
+    currentLat: number;
+    startTime: number;
+    durationMs: number;
   }
 
   const markersRef = useRef<Map<string, MarkerEntry>>(new Map());
@@ -70,7 +80,37 @@ export const TacticalMap: FC<TacticalMapProps> = ({
     };
   }, []);
 
-  // 2. Synchronize active drone markers with WebSocket telemetry
+  // 2. 60 FPS LERP (Linear Interpolation) Animation Loop
+  useEffect(() => {
+    let animId: number;
+
+    const animate = () => {
+      const now = performance.now();
+
+      for (const entry of markersRef.current.values()) {
+        const elapsed = now - entry.startTime;
+        const progress = Math.min(1.0, Math.max(0.0, elapsed / entry.durationMs));
+
+        // LERP formula: P(t) = P0 + (P1 - P0) * t
+        const lng = entry.fromLng + (entry.targetLng - entry.fromLng) * progress;
+        const lat = entry.fromLat + (entry.targetLat - entry.fromLat) * progress;
+
+        entry.currentLng = lng;
+        entry.currentLat = lat;
+        entry.marker.setLngLat([lng, lat]);
+      }
+
+      animId = requestAnimationFrame(animate);
+    };
+
+    animId = requestAnimationFrame(animate);
+
+    return () => {
+      cancelAnimationFrame(animId);
+    };
+  }, []);
+
+  // 3. Synchronize active drone markers with WebSocket telemetry
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
@@ -154,6 +194,7 @@ export const TacticalMap: FC<TacticalMapProps> = ({
           .setLngLat([dev.lon, dev.lat])
           .addTo(map);
 
+        const now = performance.now();
         entry = {
           marker,
           el,
@@ -165,11 +206,33 @@ export const TacticalMap: FC<TacticalMapProps> = ({
           iconCircle,
           arrowSvg,
           lastAngle: dev.yaw,
+          fromLng: dev.lon,
+          fromLat: dev.lat,
+          targetLng: dev.lon,
+          targetLat: dev.lat,
+          currentLng: dev.lon,
+          currentLat: dev.lat,
+          startTime: now,
+          durationMs: 100,
         };
         markersRef.current.set(dev.id, entry);
       } else {
-        // Smoothly update marker coordinates
-        entry.marker.setLngLat([dev.lon, dev.lat]);
+        const now = performance.now();
+        const elapsed = now - entry.startTime;
+        // Dynamically estimate interval between updates (~100ms for 10 Hz)
+        entry.durationMs = elapsed > 40 && elapsed < 500 ? elapsed : 100;
+
+        // Teleport safeguard: snap immediately if coordinates jump > ~5km
+        if (Math.hypot(dev.lon - entry.currentLng, dev.lat - entry.currentLat) > 0.05) {
+          entry.currentLng = dev.lon;
+          entry.currentLat = dev.lat;
+        }
+
+        entry.fromLng = entry.currentLng;
+        entry.fromLat = entry.currentLat;
+        entry.targetLng = dev.lon;
+        entry.targetLat = dev.lat;
+        entry.startTime = now;
       }
 
       // Angle Unwrapping: compute shortest angular distance to prevent 360-degree reverse spin
