@@ -1,6 +1,6 @@
-import type { FC } from 'react';
-import { Radio, Shield, Plane } from 'lucide-react';
-import type { SocketStatus } from '../telemetry/useTelemetry';
+import { Plane, Radio, Shield } from "lucide-react";
+import type { FC } from "react";
+import type { SocketStatus } from "../telemetry/useTelemetry";
 
 interface HeaderProps {
   status: SocketStatus;
@@ -8,7 +8,11 @@ interface HeaderProps {
   totalCount: number;
 }
 
-export const Header: FC<HeaderProps> = ({ status, activeCount, totalCount }) => {
+export const Header: FC<HeaderProps> = ({
+  status,
+  activeCount,
+  totalCount,
+}) => {
   return (
     <header className="h-14 bg-slate-950/90 backdrop-blur border-b border-slate-800 px-4 flex items-center justify-between z-20 select-none">
       {/* Brand & System Title */}
@@ -57,12 +61,12 @@ export const Header: FC<HeaderProps> = ({ status, activeCount, totalCount }) => 
       <div className="flex items-center space-x-3">
         <div className="flex items-center space-x-2 px-2.5 py-1 rounded bg-slate-900 border border-slate-800 text-xs font-mono">
           <Radio className="w-3.5 h-3.5 text-slate-400" />
-          {status === 'CONNECTED' ? (
+          {status === "CONNECTED" ? (
             <span className="flex items-center text-emerald-400 font-semibold">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse mr-1.5" />
               WS ONLINE
             </span>
-          ) : status === 'CONNECTING' ? (
+          ) : status === "CONNECTING" ? (
             <span className="flex items-center text-amber-400 font-semibold">
               <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping mr-1.5" />
               CONNECTING
