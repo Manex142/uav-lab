@@ -48,6 +48,11 @@ export const TacticalMap: FC<TacticalMapProps> = ({
   }
 
   const markersRef = useRef<Map<string, MarkerEntry>>(new Map());
+  const isFollowingRef = useRef(false);
+  const selectedDeviceIdRef = useRef(selectedDeviceId);
+  selectedDeviceIdRef.current = selectedDeviceId;
+  const onSelectDeviceRef = useRef(onSelectDevice);
+  onSelectDeviceRef.current = onSelectDevice;
 
   // 1. Initialize MapLibre GL 3D Map
   useEffect(() => {
@@ -72,6 +77,16 @@ export const TacticalMap: FC<TacticalMapProps> = ({
       'top-right'
     );
 
+    // Deselect active asset when clicking on empty map airspace
+    map.on('click', () => {
+      onSelectDeviceRef.current(null);
+    });
+
+    // Pause camera follow tracking if operator manually drags the map
+    map.on('dragstart', () => {
+      isFollowingRef.current = false;
+    });
+
     mapRef.current = map;
 
     return () => {
@@ -80,7 +95,7 @@ export const TacticalMap: FC<TacticalMapProps> = ({
     };
   }, []);
 
-  // 2. 60 FPS LERP (Linear Interpolation) Animation Loop
+  // 2. 60 FPS LERP (Linear Interpolation) Animation Loop + Camera Follow
   useEffect(() => {
     let animId: number;
 
@@ -98,6 +113,26 @@ export const TacticalMap: FC<TacticalMapProps> = ({
         entry.currentLng = lng;
         entry.currentLat = lat;
         entry.marker.setLngLat([lng, lat]);
+      }
+
+      // Camera Follow Mode: smoothly chase and lock onto selected drone at 60 FPS
+      if (isFollowingRef.current && selectedDeviceIdRef.current) {
+        const selectedEntry = markersRef.current.get(selectedDeviceIdRef.current);
+        const map = mapRef.current;
+        if (selectedEntry && map) {
+          const currentCenter = map.getCenter();
+          const dLng = selectedEntry.currentLng - currentCenter.lng;
+          const dLat = selectedEntry.currentLat - currentCenter.lat;
+
+          // Exponential damping eliminates any abrupt snap upon arrival
+          const factor = 0.18;
+          map.jumpTo({
+            center: [
+              currentCenter.lng + dLng * factor,
+              currentCenter.lat + dLat * factor,
+            ],
+          });
+        }
       }
 
       animId = requestAnimationFrame(animate);
@@ -132,7 +167,10 @@ export const TacticalMap: FC<TacticalMapProps> = ({
         el.className = 'drone-marker-container cursor-pointer select-none';
         el.addEventListener('click', (e) => {
           e.stopPropagation();
-          onSelectDevice(dev.id);
+          onSelectDeviceRef.current(dev.id);
+          if (selectedDeviceIdRef.current === dev.id) {
+            handleRecenter();
+          }
         });
 
         // 1. Info Pill
@@ -270,7 +308,71 @@ export const TacticalMap: FC<TacticalMapProps> = ({
     }
   }, [devices, selectedDeviceId, onSelectDevice]);
 
-  // 3. Recenter camera on selected device
+  // 4. Automatically fly to selected asset and engage camera tracking
+  const prevSelectedIdRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!selectedDeviceId) {
+      prevSelectedIdRef.current = null;
+      isFollowingRef.current = false;
+      return;
+    }
+
+    if (selectedDeviceId !== prevSelectedIdRef.current) {
+      prevSelectedIdRef.current = selectedDeviceId;
+      isFollowingRef.current = false;
+
+      const map = mapRef.current;
+      if (!map) return;
+
+      const targetDev = devices.find((d) => d.id === selectedDeviceId);
+      if (targetDev && targetDev.lat && targetDev.lon) {
+        // Intercept prediction: only project ahead if asset is ONLINE and cruising
+        const isMoving = targetDev.status === 'ONLINE' && targetDev.speed > 0.5;
+        const flyDurationMs = 1000;
+        const flyDurationSec = isMoving ? flyDurationMs / 1000 : 0;
+        const yawRad = (targetDev.yaw * Math.PI) / 180;
+        const vNorth = targetDev.speed * Math.cos(yawRad);
+        const vEast = targetDev.speed * Math.sin(yawRad);
+
+        const metersPerDegLat = 111139.0;
+        const metersPerDegLon = metersPerDegLat * Math.cos((targetDev.lat * Math.PI) / 180);
+
+        const targetLat = targetDev.lat + (vNorth * flyDurationSec) / metersPerDegLat;
+        const targetLon = targetDev.lon + (vEast * flyDurationSec) / metersPerDegLon;
+
+        map.flyTo({
+          center: [targetLon, targetLat],
+          zoom: 17.5,
+          pitch: 60,
+          duration: flyDurationMs,
+        });
+
+        // Engage continuous camera follow mode once transition completes
+        map.once('moveend', () => {
+          if (selectedDeviceIdRef.current === selectedDeviceId) {
+            isFollowingRef.current = true;
+          }
+        });
+      }
+    }
+  }, [selectedDeviceId, devices]);
+
+  // 5. Observe container resize (e.g. when sidebar collapses/expands)
+  useEffect(() => {
+    const container = mapContainerRef.current;
+    if (!container) return;
+
+    const observer = new ResizeObserver(() => {
+      mapRef.current?.resize();
+    });
+    observer.observe(container);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+
+  // 6. Recenter camera on selected device or overview
   const handleRecenter = () => {
     const map = mapRef.current;
     if (!map) return;
@@ -278,17 +380,38 @@ export const TacticalMap: FC<TacticalMapProps> = ({
     if (selectedDeviceId) {
       const selected = devices.find((d) => d.id === selectedDeviceId);
       if (selected && selected.lat && selected.lon) {
+        isFollowingRef.current = false;
+        const isMoving = selected.status === 'ONLINE' && selected.speed > 0.5;
+        const flyDurationMs = 800;
+        const flyDurationSec = isMoving ? flyDurationMs / 1000 : 0;
+        const yawRad = (selected.yaw * Math.PI) / 180;
+        const vNorth = selected.speed * Math.cos(yawRad);
+        const vEast = selected.speed * Math.sin(yawRad);
+
+        const metersPerDegLat = 111139.0;
+        const metersPerDegLon = metersPerDegLat * Math.cos((selected.lat * Math.PI) / 180);
+
+        const targetLat = selected.lat + (vNorth * flyDurationSec) / metersPerDegLat;
+        const targetLon = selected.lon + (vEast * flyDurationSec) / metersPerDegLon;
+
         map.flyTo({
-          center: [selected.lon, selected.lat],
+          center: [targetLon, targetLat],
           zoom: 17.5,
           pitch: 60,
-          speed: 1.2,
+          duration: flyDurationMs,
+        });
+
+        map.once('moveend', () => {
+          if (selectedDeviceIdRef.current === selectedDeviceId) {
+            isFollowingRef.current = true;
+          }
         });
         return;
       }
     }
 
     // Default overview
+    isFollowingRef.current = false;
     map.flyTo({
       center: DEFAULT_CENTER,
       zoom: 16.5,

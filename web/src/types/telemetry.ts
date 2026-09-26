@@ -1,4 +1,4 @@
-export type ConnectionStatus = 'ONLINE' | 'OFFLINE';
+export type ConnectionStatus = 'ONLINE' | 'OFFLINE' | 'LOST';
 
 export interface DeviceTelemetryDTO {
   id: string;
