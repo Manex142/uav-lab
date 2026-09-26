@@ -118,43 +118,64 @@ export const DeviceCard: FC<DeviceCardProps> = ({
         <div className="flex items-center space-x-1.5">
           <span
             className={`text-[9px] px-1.5 py-0.5 rounded font-bold ${
-              device.armed
+              !isOnline
+                ? 'bg-slate-800/80 text-slate-500 border border-slate-700/50'
+                : device.armed
                 ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
                 : 'bg-slate-800 text-slate-400 border border-slate-700'
             }`}
           >
-            {device.armed ? 'ARMED' : 'SAFE'}
+            {!isOnline ? 'ARMED: ?' : device.armed ? 'ARMED' : 'SAFE'}
           </span>
-          <span className="text-[9px] px-1.5 py-0.5 rounded bg-indigo-950/60 text-indigo-300 border border-indigo-700/40 font-semibold">
-            {device.flight_mode.replace('FLIGHT_MODE_', '')}
+          <span
+            className={`text-[9px] px-1.5 py-0.5 rounded font-semibold ${
+              !isOnline
+                ? 'bg-rose-950/40 text-rose-400/90 border border-rose-800/40'
+                : 'bg-indigo-950/60 text-indigo-300 border border-indigo-700/40'
+            }`}
+          >
+            {!isOnline ? 'LINK LOST' : device.flight_mode.replace('FLIGHT_MODE_', '')}
           </span>
         </div>
       </div>
 
       {/* Battery State-of-Charge Bar Gauge */}
-      <div className={`mb-2 bg-slate-950/60 p-2 rounded border ${batteryBorderClass}`}>
+      <div className={`mb-2 bg-slate-950/60 p-2 rounded border ${isOnline ? batteryBorderClass : 'border-slate-800 border-dashed'}`}>
         <div className="flex items-center justify-between text-[11px] mb-1">
           <div className="flex items-center space-x-1.5">
-            <BatteryIcon className={`w-3.5 h-3.5 ${batteryColorClass.split(' ')[1]}`} />
+            <BatteryIcon className={`w-3.5 h-3.5 ${isOnline ? batteryColorClass.split(' ')[1] : 'text-slate-500'}`} />
             <span className="text-slate-400">BATTERY:</span>
-            <span className={`font-bold ${batteryColorClass.split(' ')[1]}`}>
-              {batteryPct}%
-            </span>
+            {isOnline ? (
+              <span className={`font-bold ${batteryColorClass.split(' ')[1]}`}>
+                {batteryPct}%
+              </span>
+            ) : (
+              <span className="text-slate-500 font-bold flex items-center space-x-1">
+                <span>? %</span>
+                <span className="text-[9px] text-slate-600 font-normal">(STALE)</span>
+              </span>
+            )}
           </div>
-          <div className="text-[10px] text-slate-400 space-x-2">
-            <span>{device.battery_v.toFixed(1)}V</span>
-            <span>|</span>
-            <span>{device.battery_a.toFixed(1)}A</span>
-            <span>|</span>
-            <span>{device.battery_temp_c.toFixed(0)}&deg;C</span>
+          <div className="text-[10px] text-slate-500 space-x-2">
+            {isOnline ? (
+              <>
+                <span>{device.battery_v.toFixed(1)}V</span>
+                <span>|</span>
+                <span>{device.battery_a.toFixed(1)}A</span>
+                <span>|</span>
+                <span>{device.battery_temp_c.toFixed(0)}&deg;C</span>
+              </>
+            ) : (
+              <span>--- V | --- A | --- &deg;C</span>
+            )}
           </div>
         </div>
 
         {/* Linear progress bar */}
         <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
           <div
-            className={`h-full transition-all duration-300 ${batteryColorClass.split(' ')[0]}`}
-            style={{ width: `${Math.min(100, Math.max(0, batteryPct))}%` }}
+            className={`h-full transition-all duration-300 ${isOnline ? batteryColorClass.split(' ')[0] : 'bg-slate-700/40'}`}
+            style={{ width: isOnline ? `${Math.min(100, Math.max(0, batteryPct))}%` : '100%' }}
           />
         </div>
       </div>
@@ -166,7 +187,9 @@ export const DeviceCard: FC<DeviceCardProps> = ({
             <Navigation className="w-2.5 h-2.5 text-amber-400" />
             <span>ALTITUDE</span>
           </span>
-          <span className="font-semibold text-slate-200">{device.alt.toFixed(1)} m</span>
+          <span className={`font-semibold ${isOnline ? 'text-slate-200' : 'text-slate-500 italic'}`}>
+            {isOnline ? `${device.alt.toFixed(1)} m` : '? m'}
+          </span>
         </div>
 
         <div className="flex flex-col">
@@ -174,7 +197,9 @@ export const DeviceCard: FC<DeviceCardProps> = ({
             <Gauge className="w-2.5 h-2.5 text-cyan-400" />
             <span>SPEED</span>
           </span>
-          <span className="font-semibold text-slate-200">{device.speed.toFixed(1)} m/s</span>
+          <span className={`font-semibold ${isOnline ? 'text-slate-200' : 'text-slate-500 italic'}`}>
+            {isOnline ? `${device.speed.toFixed(1)} m/s` : '? m/s'}
+          </span>
         </div>
 
         <div className="flex flex-col">

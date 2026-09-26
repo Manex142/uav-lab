@@ -282,9 +282,13 @@ export const TacticalMap: FC<TacticalMapProps> = ({
       entry.arrowEl.style.transform = `rotate(${continuousAngle}deg)`;
 
       // Dynamic telemetry data updates without rebuilding DOM
-      entry.altSpan.textContent = `${dev.alt.toFixed(1)}m`;
-      entry.batSpan.textContent = `${dev.battery_pct.toFixed(0)}%`;
-      entry.batSpan.className = dev.battery_pct < 20 ? 'text-rose-400 font-bold' : 'text-emerald-300';
+      entry.altSpan.textContent = isOnline ? `${dev.alt.toFixed(1)}m` : '? m';
+      entry.batSpan.textContent = isOnline ? `${dev.battery_pct.toFixed(0)}%` : '?%';
+      entry.batSpan.className = !isOnline
+        ? 'text-slate-500 italic'
+        : dev.battery_pct < 20
+        ? 'text-rose-400 font-bold'
+        : 'text-emerald-300';
       entry.statusDotEl.className = `w-1.5 h-1.5 rounded-full ${isOnline ? 'bg-emerald-400 animate-pulse' : 'bg-rose-500'}`;
 
       // Selection state styling
@@ -292,6 +296,10 @@ export const TacticalMap: FC<TacticalMapProps> = ({
         entry.pillEl.className = 'mb-1.5 px-2 py-0.5 rounded bg-slate-900/90 border border-cyan-400 text-cyan-300 shadow-lg shadow-cyan-500/20 text-[10px] font-mono whitespace-nowrap backdrop-blur flex items-center space-x-1.5 pointer-events-none transition-all';
         entry.iconCircle.className = 'w-9 h-9 rounded-full bg-cyan-500/20 ring-2 ring-cyan-400 flex items-center justify-center relative shadow-md backdrop-blur';
         entry.arrowSvg.setAttribute('class', 'w-5 h-5 text-cyan-400 drop-shadow');
+      } else if (!isOnline) {
+        entry.pillEl.className = 'mb-1.5 px-2 py-0.5 rounded bg-slate-900/90 border border-rose-500/40 text-rose-300 text-[10px] font-mono whitespace-nowrap backdrop-blur flex items-center space-x-1.5 pointer-events-none transition-all';
+        entry.iconCircle.className = 'w-9 h-9 rounded-full bg-rose-950/40 ring-1 ring-rose-500/50 flex items-center justify-center relative shadow-md backdrop-blur';
+        entry.arrowSvg.setAttribute('class', 'w-5 h-5 text-rose-400 drop-shadow');
       } else {
         entry.pillEl.className = 'mb-1.5 px-2 py-0.5 rounded bg-slate-900/90 border border-slate-700 text-slate-200 text-[10px] font-mono whitespace-nowrap backdrop-blur flex items-center space-x-1.5 pointer-events-none transition-all';
         entry.iconCircle.className = 'w-9 h-9 rounded-full bg-indigo-600/30 ring-1 ring-indigo-400/60 flex items-center justify-center relative shadow-md backdrop-blur';
