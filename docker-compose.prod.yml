@@ -13,7 +13,7 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile.prod
-    image: uav-lab:prod
+    image: ghcr.io/manex142/uav-lab:latest
     container_name: uav-gateway-app
     restart: unless-stopped
     command:
