@@ -7,6 +7,8 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"os"
+	"path/filepath"
 	"sync"
 	"time"
 
@@ -19,6 +21,7 @@ import (
 type ServerConfig struct {
 	ListenAddr string
 	HubConfig  HubConfig
+	StaticDir  string
 }
 
 // DefaultServerConfig returns production defaults.
@@ -67,6 +70,18 @@ func NewServer(
 	mux.HandleFunc("/ws/telemetry", s.handleWebSocket)
 	mux.HandleFunc("/api/health", s.handleHealth)
 	mux.HandleFunc("/api/fleet", s.handleFleet)
+
+	if cfg.StaticDir != "" {
+		fs := http.FileServer(http.Dir(cfg.StaticDir))
+		mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+			path := filepath.Join(cfg.StaticDir, filepath.Clean(r.URL.Path))
+			if info, err := os.Stat(path); err == nil && !info.IsDir() {
+				fs.ServeHTTP(w, r)
+				return
+			}
+			http.ServeFile(w, r, filepath.Join(cfg.StaticDir, "index.html"))
+		})
+	}
 
 	s.httpServer = &http.Server{
 		Addr:              cfg.ListenAddr,

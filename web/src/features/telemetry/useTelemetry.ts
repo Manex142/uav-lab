@@ -3,7 +3,22 @@ import type { DeviceTelemetryDTO, WebSocketMessage, LifecycleEventMessage } from
 
 export type SocketStatus = 'CONNECTING' | 'CONNECTED' | 'DISCONNECTED';
 
-const WS_URL = 'ws://localhost:8080/ws/telemetry';
+function getWebSocketURL(): string {
+  if (import.meta.env.VITE_WS_URL) {
+    return import.meta.env.VITE_WS_URL;
+  }
+  // Fallback for Vite dev server when running on port 5173
+  if (typeof window !== 'undefined' && window.location.port === '5173') {
+    return 'ws://localhost:8080/ws/telemetry';
+  }
+  if (typeof window !== 'undefined') {
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    return `${protocol}//${window.location.host}/ws/telemetry`;
+  }
+  return 'ws://localhost:8080/ws/telemetry';
+}
+
+const WS_URL = getWebSocketURL();
 
 export function useTelemetry() {
   const [status, setStatus] = useState<SocketStatus>('CONNECTING');

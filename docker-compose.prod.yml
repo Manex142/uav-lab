@@ -1,0 +1,67 @@
+# ==============================================================================
+# UAV Lab - Production Stack (Gateway + TimescaleDB)
+# ==============================================================================
+# Orchestrates the telemetry ingestion engine, embedded React frontend, and
+# TimescaleDB, integrating seamlessly with the host Caddy Ingress Gateway.
+# Credentials and domains are loaded from the .env file.
+# ==============================================================================
+
+name: uav-prod
+
+services:
+  gateway:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.prod
+    image: uav-lab:prod
+    container_name: uav-gateway-app
+    restart: unless-stopped
+    command:
+      - gateway
+      - --db-host=timescaledb
+      - --db-user=${POSTGRES_USER:-uav_admin}
+      - --db-pass=${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be configured in .env}
+      - --db-name=${POSTGRES_DB:-uav_telemetry}
+      - --static-dir=/app/web/dist
+    ports:
+      # UDP ingestion socket: accepts telemetry packets from Raspberry Pi / simulator
+      - "9876:9876/udp"
+    networks:
+      - gateway        # Joined to host Ingress Gateway for automated TLS & reverse proxying
+      - uav-internal   # Isolated network for database communication
+    labels:
+      # Caddy Docker Proxy configuration:
+      caddy: ${UAV_DOMAIN:?UAV_DOMAIN must be configured in .env}
+      caddy.reverse_proxy: "{{upstreams 8080}}"
+    depends_on:
+      timescaledb:
+        condition: service_healthy
+
+  timescaledb:
+    image: timescale/timescaledb:latest-pg16
+    container_name: uav-timescaledb
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB:-uav_telemetry}
+      - POSTGRES_USER=${POSTGRES_USER:-uav_admin}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be configured in .env}
+    volumes:
+      - timescale_prod_data:/var/lib/postgresql/data
+    networks:
+      - uav-internal   # Fully isolated from internet and Caddy gateway
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-uav_admin} -d ${POSTGRES_DB:-uav_telemetry}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+networks:
+  # Shared external network managed by manex-infra (caddy-gateway)
+  gateway:
+    external: true
+  # Private network isolated for database access
+  uav-internal:
+    driver: bridge
+
+volumes:
+  timescale_prod_data:

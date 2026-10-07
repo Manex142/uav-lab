@@ -43,3 +43,8 @@ bin/
 *.exe
 *.test
 
+# Secrets and environment files
+.env
+.env.*
+!.env.example
+

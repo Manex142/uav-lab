@@ -41,6 +41,7 @@ type gatewayOptions struct {
 	wsFrequency int
 	homeLat     float64
 	homeLon     float64
+	staticDir   string
 }
 
 func newGatewayCmd() *cobra.Command {
@@ -79,6 +80,7 @@ and real-time HTTP/WebSocket streaming for web dashboards.`,
 	flags.IntVar(&opts.wsFrequency, "ws-hz", 10, "Frecuencia de refresco WebSocket para clientes web (Hz)")
 	flags.Float64Var(&opts.homeLat, "home-lat", server.DefaultHomeLat, "Latitud de origen para proyección geográfica (WGS84)")
 	flags.Float64Var(&opts.homeLon, "home-lon", server.DefaultHomeLon, "Longitud de origen para proyección geográfica (WGS84)")
+	flags.StringVar(&opts.staticDir, "static-dir", "", "Directorio de archivos estáticos del frontend para servir en la raíz /")
 
 	return cmd
 }
@@ -160,6 +162,7 @@ func runGateway(opts *gatewayOptions) error {
 				HomeLatitude:  opts.homeLat,
 				HomeLongitude: opts.homeLon,
 			},
+			StaticDir: opts.staticDir,
 		}
 		webServer = server.NewServer(srvCfg, registry, metrics)
 		if err := webServer.Start(); err != nil {

@@ -1,0 +1,59 @@
+# ==============================================================================
+# Stage 1: Build Frontend (React + Vite + Tailwind)
+# ==============================================================================
+FROM node:22-alpine AS frontend-builder
+WORKDIR /app/web
+
+# Install frontend dependencies
+COPY web/package.json web/package-lock.json ./
+RUN npm ci
+
+# Copy web source files and compile static assets
+COPY web/ ./
+RUN npm run build
+
+# ==============================================================================
+# Stage 2: Build Backend (Go Telemetry Gateway)
+# ==============================================================================
+FROM golang:alpine AS backend-builder
+WORKDIR /app
+
+# Install build dependencies
+RUN apk add --no-cache git ca-certificates
+
+# Download and cache Go dependencies
+COPY go.mod go.sum ./
+RUN go mod download
+
+# Copy source tree
+COPY cmd/ ./cmd/
+COPY internal/ ./internal/
+COPY gen/ ./gen/
+
+# Build statically linked production binary
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o /bin/uav ./cmd/uav
+
+# ==============================================================================
+# Stage 3: Minimal Production Runtime
+# ==============================================================================
+FROM alpine:3.21
+WORKDIR /app
+
+# Install runtime dependencies (certificates, timezone data)
+RUN apk add --no-cache ca-certificates tzdata
+
+# Copy compiled Go binary
+COPY --from=backend-builder /bin/uav /usr/local/bin/uav
+
+# Copy frontend static build assets
+COPY --from=frontend-builder /app/web/dist /app/web/dist
+
+# Expose ports:
+# 8080/tcp: HTTP REST API, WebSocket stream & React SPA
+# 9876/udp: UDP Ingestion Socket for Drone Telemetry
+EXPOSE 8080/tcp
+EXPOSE 9876/udp
+
+# Default entrypoint and command
+ENTRYPOINT ["uav"]
+CMD ["gateway", "--db-host", "timescaledb", "--static-dir", "/app/web/dist"]
