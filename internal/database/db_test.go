@@ -70,4 +70,19 @@ func TestDatabaseConnectionAndMigrations(t *testing.T) {
 	if indexCount != 1 {
 		t.Errorf("Expected 1 index named 'idx_telemetry_device_time', found %d", indexCount)
 	}
+
+	// 5. Verify TimescaleDB retention policies
+	var retentionJobs int
+	err = pool.QueryRow(ctx, `
+		SELECT count(*) 
+		FROM timescaledb_information.jobs 
+		WHERE proc_name = 'policy_retention' 
+		  AND hypertable_name IN ('telemetry', 'device_events');
+	`).Scan(&retentionJobs)
+	if err != nil {
+		t.Fatalf("Failed to check retention jobs: %v", err)
+	}
+	if retentionJobs != 2 {
+		t.Errorf("Expected 2 retention policies, found %d", retentionJobs)
+	}
 }
