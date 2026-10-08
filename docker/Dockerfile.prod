@@ -1,7 +1,8 @@
 # ==============================================================================
 # Stage 1: Build Frontend (React + Vite + Tailwind)
 # ==============================================================================
-FROM node:22-alpine AS frontend-builder
+# Runs natively on BUILDPLATFORM to avoid slow QEMU emulation during npm builds
+FROM --platform=$BUILDPLATFORM node:22-alpine AS frontend-builder
 WORKDIR /app/web
 
 # Install frontend dependencies
@@ -15,8 +16,12 @@ RUN npm run build
 # ==============================================================================
 # Stage 2: Build Backend (Go Telemetry Gateway)
 # ==============================================================================
-FROM golang:alpine AS backend-builder
+# Runs natively on BUILDPLATFORM and leverages Go native cross-compilation
+FROM --platform=$BUILDPLATFORM golang:alpine AS backend-builder
 WORKDIR /app
+
+ARG TARGETOS
+ARG TARGETARCH
 
 # Install build dependencies
 RUN apk add --no-cache git ca-certificates
@@ -30,8 +35,8 @@ COPY cmd/ ./cmd/
 COPY internal/ ./internal/
 COPY gen/ ./gen/
 
-# Build statically linked production binary
-RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o /bin/uav ./cmd/uav
+# Build statically linked production binary targeting TARGETARCH (amd64 or arm64)
+RUN CGO_ENABLED=0 GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH:-amd64} go build -ldflags="-s -w" -o /bin/uav ./cmd/uav
 
 # ==============================================================================
 # Stage 3: Minimal Production Runtime
