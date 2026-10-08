@@ -24,8 +24,8 @@ services:
       - --db-name=${POSTGRES_DB:-uav_telemetry}
       - --static-dir=/app/web/dist
     ports:
-      # UDP ingestion socket: accepts telemetry packets from Raspberry Pi / simulator
-      - "9876:9876/udp"
+      # UDP ingestion socket: restricted strictly to WireGuard VPN interface (10.0.0.1)
+      - "${UDP_BIND_IP:-10.0.0.1}:9876:9876/udp"
     networks:
       - gateway        # Joined to host Ingress Gateway for automated TLS & reverse proxying
       - uav-internal   # Isolated network for database communication
