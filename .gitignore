@@ -46,5 +46,5 @@ bin/
 # Secrets and environment files
 .env
 .env.*
-!.env.example
+!.env*.example
 

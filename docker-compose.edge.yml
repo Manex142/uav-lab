@@ -1,0 +1,40 @@
+services:
+  # ============================================================================
+  # UAV Edge Simulator / Companion Computer Agent
+  # ============================================================================
+  uav-edge:
+    image: ghcr.io/manex142/uav-lab:latest
+    container_name: uav-edge
+    restart: unless-stopped
+    command:
+      - sim
+      - --target-addr=${GATEWAY_TARGET:-10.0.0.1:9876}
+      - --drones=${DRONE_COUNT:-3}
+      - --frequency=${TELEMETRY_RATE:-10}
+    environment:
+      - GATEWAY_TARGET=${GATEWAY_TARGET:-10.0.0.1:9876}
+      - DRONE_COUNT=${DRONE_COUNT:-3}
+      - TELEMETRY_RATE=${TELEMETRY_RATE:-10}
+    labels:
+      # Tell Watchtower to monitor and automatically update this service
+      - "com.centurylinklabs.watchtower.enable=true"
+
+  # ============================================================================
+  # Watchtower: Automated Over-The-Air (OTA) Pull-based Updater
+  # ============================================================================
+  watchtower:
+    image: containrrr/watchtower:latest
+    container_name: uav-watchtower
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      # Only watch and update containers explicitly labeled with enable=true
+      - WATCHTOWER_LABEL_ENABLE=true
+      # Automatically purge outdated Docker images to preserve SD card storage
+      - WATCHTOWER_CLEANUP=true
+      # Poll interval in seconds (default: 300s = 5 minutes)
+      - WATCHTOWER_POLL_INTERVAL=${WATCHTOWER_POLL_INTERVAL:-300}
+    labels:
+      # Prevent Watchtower from restarting itself
+      - "com.centurylinklabs.watchtower.enable=false"
