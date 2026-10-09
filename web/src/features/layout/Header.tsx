@@ -22,14 +22,14 @@ export const Header: FC<HeaderProps> = ({
         </div>
         <div>
           <div className="flex items-center space-x-2">
-            <span className="font-mono font-bold tracking-wider text-slate-100 text-sm">
-              UAV LAB // TACTICAL FLEET OPERATIONS
+            <span className="font-mono font-bold tracking-wider text-slate-100 text-sm truncate max-w-[200px] sm:max-w-none block sm:inline">
+              UAV LAB <span className="hidden sm:inline">// TACTICAL FLEET OPERATIONS</span>
             </span>
-            <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 uppercase tracking-widest font-semibold">
+            <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 uppercase tracking-widest font-semibold hidden sm:inline-block">
               v1.0 SCADA
             </span>
           </div>
-          <p className="text-[11px] text-slate-400 font-mono">
+          <p className="text-[11px] text-slate-400 font-mono hidden sm:block">
             High-Throughput Cyber-Physical Gateway &bull; WGS84 Geodesy
           </p>
         </div>

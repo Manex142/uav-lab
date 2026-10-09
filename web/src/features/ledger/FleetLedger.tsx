@@ -79,8 +79,8 @@ export const FleetLedger: FC<FleetLedgerProps> = ({
 
   return (
     <aside
-      className={`relative z-20 flex flex-col h-[calc(100vh-3.5rem)] bg-slate-950/95 backdrop-blur-md border-r border-slate-800 transition-all duration-300 ease-in-out select-none ${
-        isOpen ? 'w-80 sm:w-96' : 'w-0'
+      className={`absolute md:relative z-20 flex flex-col h-[calc(100vh-3.5rem)] bg-slate-950/95 backdrop-blur-md border-r border-slate-800 transition-all duration-300 ease-in-out select-none ${
+        isOpen ? 'w-[85vw] sm:w-96 shadow-2xl md:shadow-none' : 'w-0'
       }`}
     >
       {/* Floating Sidebar Toggle Button */}
