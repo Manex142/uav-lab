@@ -29,6 +29,7 @@ export const TacticalMap: FC<TacticalMapProps> = ({
 
   interface MarkerEntry {
     marker: Marker;
+    pillMarker: Marker;
     el: HTMLElement;
     arrowEl: HTMLElement;
     pillEl: HTMLElement;
@@ -129,6 +130,7 @@ export const TacticalMap: FC<TacticalMapProps> = ({
         entry.currentLng = lng;
         entry.currentLat = lat;
         entry.marker.setLngLat([lng, lat]);
+        entry.pillMarker.setLngLat([lng, lat]);
       }
 
       // Camera Follow Mode: smoothly chase and lock onto selected drone at 60 FPS
@@ -178,20 +180,26 @@ export const TacticalMap: FC<TacticalMapProps> = ({
       let entry = markersRef.current.get(dev.id);
 
       if (!entry) {
-        // Create marker container element
+        // Create marker container elements
         const el = document.createElement('div');
-        el.className = 'drone-marker-container cursor-pointer select-none';
-        el.addEventListener('click', (e) => {
+        el.className = 'drone-marker-icon cursor-pointer select-none';
+
+        const pillContainer = document.createElement('div');
+        pillContainer.className = 'drone-marker-pill cursor-pointer select-none pb-4';
+
+        const clickHandler = (e: MouseEvent) => {
           e.stopPropagation();
           onSelectDeviceRef.current(dev.id);
           if (selectedDeviceIdRef.current === dev.id) {
             handleRecenter();
           }
-        });
+        };
+        el.addEventListener('click', clickHandler);
+        pillContainer.addEventListener('click', clickHandler);
 
         // 1. Info Pill
         const pillEl = document.createElement('div');
-        pillEl.className = 'mb-1.5 px-2 py-0.5 rounded bg-white/90 dark:bg-slate-900/90 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 text-[10px] font-mono whitespace-nowrap backdrop-blur flex items-center space-x-1.5 pointer-events-none transition-all';
+        pillEl.className = 'px-2 py-0.5 rounded bg-white/90 dark:bg-slate-900/90 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 text-[10px] font-mono whitespace-nowrap backdrop-blur flex items-center space-x-1.5 pointer-events-none transition-all';
 
         const statusDotEl = document.createElement('span');
         statusDotEl.className = 'w-1.5 h-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse';
@@ -217,6 +225,7 @@ export const TacticalMap: FC<TacticalMapProps> = ({
         batSpan.textContent = `${dev.battery_pct.toFixed(0)}%`;
 
         pillEl.append(statusDotEl, idSpan, sep1, altSpan, sep2, batSpan);
+        pillContainer.appendChild(pillEl);
 
         // 2. Rotating Arrow Container
         const arrowEl = document.createElement('div');
@@ -233,11 +242,7 @@ export const TacticalMap: FC<TacticalMapProps> = ({
 
         iconCircle.appendChild(arrowSvg);
         arrowEl.appendChild(iconCircle);
-
-        const wrapper = document.createElement('div');
-        wrapper.className = 'relative flex flex-col items-center group';
-        wrapper.append(pillEl, arrowEl);
-        el.appendChild(wrapper);
+        el.appendChild(arrowEl);
 
         const marker = new Marker({
           element: el,
@@ -248,9 +253,20 @@ export const TacticalMap: FC<TacticalMapProps> = ({
           .setLngLat([dev.lon, dev.lat])
           .addTo(map);
 
+        const pillMarker = new Marker({
+          element: pillContainer,
+          anchor: 'bottom', // anchor bottom so translateY moves it up from the drone's center
+          offset: [0, -18], // Native MapLibre offset: 18px up
+          rotationAlignment: 'viewport',
+          pitchAlignment: 'viewport',
+        })
+          .setLngLat([dev.lon, dev.lat])
+          .addTo(map);
+
         const now = performance.now();
         entry = {
           marker,
+          pillMarker,
           el,
           arrowEl,
           pillEl,
@@ -309,15 +325,15 @@ export const TacticalMap: FC<TacticalMapProps> = ({
 
       // Selection state styling
       if (isSelected) {
-        entry.pillEl.className = 'mb-1.5 px-2 py-0.5 rounded bg-white/90 dark:bg-slate-900/90 border border-cyan-500 dark:border-cyan-400 text-cyan-700 dark:text-cyan-300 shadow-lg shadow-cyan-500/20 text-[10px] font-mono whitespace-nowrap backdrop-blur flex items-center space-x-1.5 pointer-events-none transition-all';
+        entry.pillEl.className = 'px-2 py-0.5 rounded bg-white/90 dark:bg-slate-900/90 border border-cyan-500 dark:border-cyan-400 text-cyan-700 dark:text-cyan-300 shadow-lg shadow-cyan-500/20 text-[10px] font-mono whitespace-nowrap backdrop-blur flex items-center space-x-1.5 pointer-events-none transition-all';
         entry.iconCircle.className = 'w-9 h-9 rounded-full bg-cyan-100/80 dark:bg-cyan-500/20 ring-2 ring-cyan-500 dark:ring-cyan-400 flex items-center justify-center relative shadow-md backdrop-blur';
         entry.arrowSvg.setAttribute('class', 'w-5 h-5 text-cyan-600 dark:text-cyan-400 drop-shadow');
       } else if (!isOnline) {
-        entry.pillEl.className = 'mb-1.5 px-2 py-0.5 rounded bg-white/90 dark:bg-slate-900/90 border border-rose-400 dark:border-rose-500/40 text-rose-600 dark:text-rose-300 text-[10px] font-mono whitespace-nowrap backdrop-blur flex items-center space-x-1.5 pointer-events-none transition-all';
+        entry.pillEl.className = 'px-2 py-0.5 rounded bg-white/90 dark:bg-slate-900/90 border border-rose-400 dark:border-rose-500/40 text-rose-600 dark:text-rose-300 text-[10px] font-mono whitespace-nowrap backdrop-blur flex items-center space-x-1.5 pointer-events-none transition-all';
         entry.iconCircle.className = 'w-9 h-9 rounded-full bg-rose-100/80 dark:bg-rose-950/40 ring-1 ring-rose-400 dark:ring-rose-500/50 flex items-center justify-center relative shadow-md backdrop-blur';
         entry.arrowSvg.setAttribute('class', 'w-5 h-5 text-rose-500 dark:text-rose-400 drop-shadow');
       } else {
-        entry.pillEl.className = 'mb-1.5 px-2 py-0.5 rounded bg-white/90 dark:bg-slate-900/90 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 text-[10px] font-mono whitespace-nowrap backdrop-blur flex items-center space-x-1.5 pointer-events-none transition-all';
+        entry.pillEl.className = 'px-2 py-0.5 rounded bg-white/90 dark:bg-slate-900/90 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 text-[10px] font-mono whitespace-nowrap backdrop-blur flex items-center space-x-1.5 pointer-events-none transition-all';
         entry.iconCircle.className = 'w-9 h-9 rounded-full bg-indigo-100/80 dark:bg-indigo-600/30 ring-1 ring-indigo-400/60 flex items-center justify-center relative shadow-md backdrop-blur';
         entry.arrowSvg.setAttribute('class', 'w-5 h-5 text-indigo-600 dark:text-indigo-300 drop-shadow');
       }
@@ -327,6 +343,7 @@ export const TacticalMap: FC<TacticalMapProps> = ({
     for (const [id, entry] of markersRef.current.entries()) {
       if (!currentDeviceIds.has(id)) {
         entry.marker.remove();
+        entry.pillMarker.remove();
         markersRef.current.delete(id);
       }
     }
