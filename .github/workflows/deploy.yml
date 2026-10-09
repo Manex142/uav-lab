@@ -17,6 +17,9 @@ jobs:
     services:
       timescaledb:
         image: timescale/timescaledb:latest-pg16
+        credentials:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
         env:
           POSTGRES_DB: uav_telemetry
           POSTGRES_USER: uav_admin
