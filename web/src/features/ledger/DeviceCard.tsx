@@ -42,17 +42,17 @@ export const DeviceCard: FC<DeviceCardProps> = ({
 
   // Determine battery color tokens
   const batteryPct = Math.round(device.battery_pct);
-  let batteryColorClass = 'bg-emerald-500 text-emerald-400';
-  let batteryBorderClass = 'border-emerald-500/30';
+  let batteryColorClass = 'bg-emerald-500 text-emerald-600 dark:text-emerald-400';
+  let batteryBorderClass = 'border-emerald-300 dark:border-emerald-500/30';
   let BatteryIcon = Battery;
 
   if (batteryPct < 15) {
-    batteryColorClass = 'bg-rose-500 text-rose-400';
-    batteryBorderClass = 'border-rose-500/50';
+    batteryColorClass = 'bg-rose-500 text-rose-600 dark:text-rose-400';
+    batteryBorderClass = 'border-rose-300 dark:border-rose-500/50';
     BatteryIcon = BatteryLow;
   } else if (batteryPct < 25) {
-    batteryColorClass = 'bg-amber-400 text-amber-300';
-    batteryBorderClass = 'border-amber-400/40';
+    batteryColorClass = 'bg-amber-400 text-amber-600 dark:text-amber-300';
+    batteryBorderClass = 'border-amber-300 dark:border-amber-400/40';
     BatteryIcon = BatteryWarning;
   }
 
@@ -65,24 +65,24 @@ export const DeviceCard: FC<DeviceCardProps> = ({
       onClick={() => onSelect(device.id)}
       className={`p-3 rounded-lg border transition-all cursor-pointer select-none text-xs font-mono relative overflow-hidden group ${
         isSelected
-          ? 'bg-slate-900/90 border-cyan-400 ring-1 ring-cyan-400/70 shadow-lg shadow-cyan-500/10'
+          ? 'bg-cyan-50/50 dark:bg-slate-900/90 border-cyan-400 ring-1 ring-cyan-400/70 shadow-lg shadow-cyan-500/10'
           : isCritical
-          ? 'bg-rose-950/20 border-rose-600/50 hover:border-rose-500 hover:bg-rose-950/30'
+          ? 'bg-rose-50 dark:bg-rose-950/20 border-rose-300 dark:border-rose-600/50 hover:border-rose-400 dark:hover:border-rose-500 hover:bg-rose-100 dark:hover:bg-rose-950/30'
           : isWarning
-          ? 'bg-amber-950/15 border-amber-600/40 hover:border-amber-500 hover:bg-amber-950/25'
-          : 'bg-slate-900/40 border-slate-800 hover:border-slate-700 hover:bg-slate-900/70'
+          ? 'bg-amber-50 dark:bg-amber-950/15 border-amber-300 dark:border-amber-600/40 hover:border-amber-400 dark:hover:border-amber-500 hover:bg-amber-100 dark:hover:bg-amber-950/25'
+          : 'bg-white dark:bg-slate-900/40 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-900/70'
       }`}
     >
       {/* Top Banner Alert Indicator for Distress Units */}
       {isCritical && (
-        <div className="flex items-center space-x-1 text-[10px] text-rose-300 font-bold bg-rose-500/20 px-2 py-0.5 -mx-3 -mt-3 mb-2 border-b border-rose-500/40">
-          <ShieldAlert className="w-3 h-3 text-rose-400 animate-pulse" />
+        <div className="flex items-center space-x-1 text-[10px] text-rose-700 dark:text-rose-300 font-bold bg-rose-100 dark:bg-rose-500/20 px-2 py-0.5 -mx-3 -mt-3 mb-2 border-b border-rose-200 dark:border-rose-500/40">
+          <ShieldAlert className="w-3 h-3 text-rose-500 dark:text-rose-400 animate-pulse" />
           <span>OPERATIONAL RISK: {isOnline ? 'CRITICAL BATTERY' : 'COMM LINK LOST'}</span>
         </div>
       )}
       {isWarning && isOnline && (
-        <div className="flex items-center space-x-1 text-[10px] text-amber-300 font-bold bg-amber-500/15 px-2 py-0.5 -mx-3 -mt-3 mb-2 border-b border-amber-500/30">
-          <AlertTriangle className="w-3 h-3 text-amber-400" />
+        <div className="flex items-center space-x-1 text-[10px] text-amber-700 dark:text-amber-300 font-bold bg-amber-100 dark:bg-amber-500/15 px-2 py-0.5 -mx-3 -mt-3 mb-2 border-b border-amber-200 dark:border-amber-500/30">
+          <AlertTriangle className="w-3 h-3 text-amber-500 dark:text-amber-400" />
           <span>OPERATIONAL WARNING: LOW BATTERY TIER</span>
         </div>
       )}
@@ -92,23 +92,23 @@ export const DeviceCard: FC<DeviceCardProps> = ({
         <div className="flex items-center space-x-2">
           <span
             className={`w-2 h-2 rounded-full ${
-              isOnline ? 'bg-emerald-400 animate-pulse' : 'bg-rose-500'
+              isOnline ? 'bg-emerald-500 dark:bg-emerald-400 animate-pulse' : 'bg-rose-600 dark:bg-rose-500'
             }`}
           />
           <span
             className={`font-bold text-sm tracking-wide ${
-              isSelected ? 'text-cyan-300' : 'text-slate-100 group-hover:text-cyan-400'
+              isSelected ? 'text-cyan-700 dark:text-cyan-300' : 'text-slate-900 dark:text-slate-100 group-hover:text-cyan-600 dark:group-hover:text-cyan-400'
             }`}
           >
             {device.id}
           </span>
           {isOnline ? (
-            <span className="flex items-center text-[10px] text-emerald-400 font-semibold bg-emerald-500/10 px-1.5 py-0.2 rounded border border-emerald-500/20">
+            <span className="flex items-center text-[10px] text-emerald-700 dark:text-emerald-400 font-semibold bg-emerald-50 dark:bg-emerald-500/10 px-1.5 py-0.2 rounded border border-emerald-200 dark:border-emerald-500/20">
               <Wifi className="w-2.5 h-2.5 mr-1" />
               ONLINE
             </span>
           ) : (
-            <span className="flex items-center text-[10px] text-rose-400 font-semibold bg-rose-500/10 px-1.5 py-0.2 rounded border border-rose-500/20">
+            <span className="flex items-center text-[10px] text-rose-700 dark:text-rose-400 font-semibold bg-rose-50 dark:bg-rose-500/10 px-1.5 py-0.2 rounded border border-rose-200 dark:border-rose-500/20">
               <WifiOff className="w-2.5 h-2.5 mr-1" />
               LOST
             </span>
@@ -119,10 +119,10 @@ export const DeviceCard: FC<DeviceCardProps> = ({
           <span
             className={`text-[9px] px-1.5 py-0.5 rounded font-bold ${
               !isOnline
-                ? 'bg-slate-800/80 text-slate-500 border border-slate-700/50'
+                ? 'bg-slate-100 dark:bg-slate-800/80 text-slate-500 border border-slate-300 dark:border-slate-700/50'
                 : device.armed
-                ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
-                : 'bg-slate-800 text-slate-400 border border-slate-700'
+                ? 'bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-300 dark:border-amber-500/30'
+                : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-300 dark:border-slate-700'
             }`}
           >
             {!isOnline ? 'ARMED: ?' : device.armed ? 'ARMED' : 'SAFE'}
@@ -130,8 +130,8 @@ export const DeviceCard: FC<DeviceCardProps> = ({
           <span
             className={`text-[9px] px-1.5 py-0.5 rounded font-semibold ${
               !isOnline
-                ? 'bg-rose-950/40 text-rose-400/90 border border-rose-800/40'
-                : 'bg-indigo-950/60 text-indigo-300 border border-indigo-700/40'
+                ? 'bg-rose-100 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400/90 border border-rose-300 dark:border-rose-800/40'
+                : 'bg-indigo-100 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-700/40'
             }`}
           >
             {!isOnline ? 'LINK LOST' : device.flight_mode.replace('FLIGHT_MODE_', '')}
@@ -140,11 +140,11 @@ export const DeviceCard: FC<DeviceCardProps> = ({
       </div>
 
       {/* Battery State-of-Charge Bar Gauge */}
-      <div className={`mb-2 bg-slate-950/60 p-2 rounded border ${isOnline ? batteryBorderClass : 'border-slate-800 border-dashed'}`}>
+      <div className={`mb-2 bg-slate-100 dark:bg-slate-950/60 p-2 rounded border ${isOnline ? batteryBorderClass : 'border-slate-300 dark:border-slate-800 border-dashed'}`}>
         <div className="flex items-center justify-between text-[11px] mb-1">
           <div className="flex items-center space-x-1.5">
             <BatteryIcon className={`w-3.5 h-3.5 ${isOnline ? batteryColorClass.split(' ')[1] : 'text-slate-500'}`} />
-            <span className="text-slate-400">BATTERY:</span>
+            <span className="text-slate-500 dark:text-slate-400">BATTERY:</span>
             {isOnline ? (
               <span className={`font-bold ${batteryColorClass.split(' ')[1]}`}>
                 {batteryPct}%
@@ -152,7 +152,7 @@ export const DeviceCard: FC<DeviceCardProps> = ({
             ) : (
               <span className="text-slate-500 font-bold flex items-center space-x-1">
                 <span>? %</span>
-                <span className="text-[9px] text-slate-600 font-normal">(STALE)</span>
+                <span className="text-[9px] text-slate-400 dark:text-slate-600 font-normal">(STALE)</span>
               </span>
             )}
           </div>
@@ -172,52 +172,52 @@ export const DeviceCard: FC<DeviceCardProps> = ({
         </div>
 
         {/* Linear progress bar */}
-        <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+        <div className="w-full h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
           <div
-            className={`h-full transition-all duration-300 ${isOnline ? batteryColorClass.split(' ')[0] : 'bg-slate-700/40'}`}
+            className={`h-full transition-all duration-300 ${isOnline ? batteryColorClass.split(' ')[0] : 'bg-slate-300 dark:bg-slate-700/40'}`}
             style={{ width: isOnline ? `${Math.min(100, Math.max(0, batteryPct))}%` : '100%' }}
           />
         </div>
       </div>
 
       {/* Telemetry Metrics Grid: Altitude, Speed, Pos, Last Seen */}
-      <div className="grid grid-cols-3 gap-1.5 text-[10px] bg-slate-950/40 p-1.5 rounded border border-slate-800/40">
+      <div className="grid grid-cols-3 gap-1.5 text-[10px] bg-slate-100 dark:bg-slate-950/40 p-1.5 rounded border border-slate-200 dark:border-slate-800/40">
         <div className="flex flex-col">
           <span className="text-slate-500 flex items-center space-x-1">
-            <Navigation className="w-2.5 h-2.5 text-amber-400" />
+            <Navigation className="w-2.5 h-2.5 text-amber-600 dark:text-amber-400" />
             <span>ALTITUDE</span>
           </span>
-          <span className={`font-semibold ${isOnline ? 'text-slate-200' : 'text-slate-500 italic'}`}>
+          <span className={`font-semibold ${isOnline ? 'text-slate-800 dark:text-slate-200' : 'text-slate-500 italic'}`}>
             {isOnline ? `${device.alt.toFixed(1)} m` : '? m'}
           </span>
         </div>
 
         <div className="flex flex-col">
           <span className="text-slate-500 flex items-center space-x-1">
-            <Gauge className="w-2.5 h-2.5 text-cyan-400" />
+            <Gauge className="w-2.5 h-2.5 text-cyan-600 dark:text-cyan-400" />
             <span>SPEED</span>
           </span>
-          <span className={`font-semibold ${isOnline ? 'text-slate-200' : 'text-slate-500 italic'}`}>
+          <span className={`font-semibold ${isOnline ? 'text-slate-800 dark:text-slate-200' : 'text-slate-500 italic'}`}>
             {isOnline ? `${device.speed.toFixed(1)} m/s` : '? m/s'}
           </span>
         </div>
 
         <div className="flex flex-col">
           <span className="text-slate-500 flex items-center space-x-1">
-            <Activity className="w-2.5 h-2.5 text-slate-400" />
+            <Activity className="w-2.5 h-2.5 text-slate-500 dark:text-slate-400" />
             <span>LAST SEEN</span>
           </span>
           <span
             className={`font-semibold flex items-center ${
               lastSeenStr === 'LIVE'
-                ? 'text-emerald-400 font-bold'
+                ? 'text-emerald-600 dark:text-emerald-400 font-bold'
                 : isOnline
-                ? 'text-slate-300'
-                : 'text-rose-400 font-bold'
+                ? 'text-slate-700 dark:text-slate-300'
+                : 'text-rose-600 dark:text-rose-400 font-bold'
             }`}
           >
             {lastSeenStr === 'LIVE' && (
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse mr-1" />
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse mr-1" />
             )}
             <span>{lastSeenStr}</span>
           </span>

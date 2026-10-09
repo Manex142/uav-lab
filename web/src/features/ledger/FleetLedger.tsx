@@ -79,7 +79,7 @@ export const FleetLedger: FC<FleetLedgerProps> = ({
 
   return (
     <aside
-      className={`absolute md:relative z-20 flex flex-col h-[calc(100vh-3.5rem)] bg-slate-950/95 backdrop-blur-md border-r border-slate-800 transition-all duration-300 ease-in-out select-none ${
+      className={`absolute md:relative z-20 flex flex-col h-[calc(100vh-3.5rem)] bg-white/95 dark:bg-slate-950/95 backdrop-blur-md md:border-r border-slate-200 dark:border-slate-800 transition-all duration-300 ease-in-out select-none ${
         isOpen ? 'w-[85vw] sm:w-96 shadow-2xl md:shadow-none' : 'w-0'
       }`}
     >
@@ -87,7 +87,7 @@ export const FleetLedger: FC<FleetLedgerProps> = ({
       <button
         onClick={onToggleOpen}
         title={isOpen ? 'Collapse Fleet Ledger' : 'Expand Fleet Ledger'}
-        className="absolute -right-9 top-4 z-30 p-2 rounded-r-md bg-slate-900/90 hover:bg-slate-800 text-slate-300 hover:text-cyan-400 border-y border-r border-slate-800 shadow-xl cursor-pointer transition-colors backdrop-blur active:scale-95"
+        className="absolute -right-9 top-4 z-30 p-2 rounded-r-md bg-white/90 dark:bg-slate-900/90 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-cyan-600 dark:hover:text-cyan-400 border-y border-r border-slate-200 dark:border-slate-800 shadow-xl cursor-pointer transition-colors backdrop-blur active:scale-95"
       >
         {isOpen ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
       </button>
@@ -99,16 +99,16 @@ export const FleetLedger: FC<FleetLedgerProps> = ({
         }`}
       >
         {/* Header Title & Health Metric Badges */}
-        <div className="p-3.5 border-b border-slate-800/80 space-y-2.5">
+        <div className="p-3.5 border-b border-slate-200 dark:border-slate-800/80 space-y-2.5">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2 text-cyan-400 font-bold font-mono text-xs tracking-wider">
+            <div className="flex items-center space-x-2 text-cyan-600 dark:text-cyan-400 font-bold font-mono text-xs tracking-wider">
               <Layers className="w-4 h-4" />
               <span>FLEET LEDGER</span>
             </div>
             {selectedDeviceId && (
               <button
                 onClick={() => onSelectDevice(null)}
-                className="flex items-center space-x-1 text-[10px] font-mono text-slate-400 hover:text-rose-400 transition-colors"
+                className="flex items-center space-x-1 text-[10px] font-mono text-slate-500 dark:text-slate-400 hover:text-rose-500 dark:hover:text-rose-400 transition-colors"
                 title="Deselect active asset"
               >
                 <span>CLEAR FOCUS</span>
@@ -119,40 +119,40 @@ export const FleetLedger: FC<FleetLedgerProps> = ({
 
           {/* Fleet Health Counter Chips */}
           <div className="grid grid-cols-3 gap-1.5 font-mono text-[10px]">
-            <div className="p-1.5 rounded bg-slate-900/80 border border-slate-800 flex flex-col items-center">
-              <span className="text-slate-400">TOTAL</span>
-              <span className="font-bold text-slate-100">{totalCount}</span>
+            <div className="p-1.5 rounded bg-slate-100 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 flex flex-col items-center">
+              <span className="text-slate-500 dark:text-slate-400">TOTAL</span>
+              <span className="font-bold text-slate-900 dark:text-slate-100">{totalCount}</span>
             </div>
-            <div className="p-1.5 rounded bg-emerald-950/30 border border-emerald-500/20 flex flex-col items-center">
-              <span className="text-emerald-400 flex items-center space-x-1">
+            <div className="p-1.5 rounded bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-500/20 flex flex-col items-center">
+              <span className="text-emerald-600 dark:text-emerald-400 flex items-center space-x-1">
                 <ShieldCheck className="w-2.5 h-2.5" />
                 <span>ONLINE</span>
               </span>
-              <span className="font-bold text-emerald-300">{onlineCount}</span>
+              <span className="font-bold text-emerald-700 dark:text-emerald-300">{onlineCount}</span>
             </div>
-            <div className="p-1.5 rounded bg-rose-950/30 border border-rose-500/20 flex flex-col items-center">
-              <span className="text-rose-400 flex items-center space-x-1">
+            <div className="p-1.5 rounded bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-500/20 flex flex-col items-center">
+              <span className="text-rose-600 dark:text-rose-400 flex items-center space-x-1">
                 <AlertTriangle className="w-2.5 h-2.5" />
                 <span>ALERTS</span>
               </span>
-              <span className="font-bold text-rose-300">{alertCount}</span>
+              <span className="font-bold text-rose-700 dark:text-rose-300">{alertCount}</span>
             </div>
           </div>
 
           {/* Search Box */}
           <div className="relative">
-            <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-500" />
+            <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
             <input
               type="text"
               placeholder="Search by asset ID (e.g. uav-005)..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-slate-900/80 border border-slate-800 focus:border-cyan-500/60 rounded-md pl-8 pr-7 py-1.5 text-xs font-mono text-slate-200 placeholder-slate-500 outline-none transition-all"
+              className="w-full bg-white dark:bg-slate-900/80 border border-slate-300 dark:border-slate-800 focus:border-cyan-500/60 rounded-md pl-8 pr-7 py-1.5 text-xs font-mono text-slate-900 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 outline-none transition-all"
             />
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery('')}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200"
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
@@ -168,8 +168,8 @@ export const FleetLedger: FC<FleetLedgerProps> = ({
                 onClick={() => setStatusFilter(tab)}
                 className={`flex-1 py-1 rounded border transition-all cursor-pointer font-semibold ${
                   statusFilter === tab
-                    ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40 shadow-sm shadow-cyan-500/10'
-                    : 'bg-slate-900/50 text-slate-400 border-slate-800 hover:bg-slate-800 hover:text-slate-200'
+                    ? 'bg-cyan-100 dark:bg-cyan-500/20 text-cyan-700 dark:text-cyan-300 border-cyan-300 dark:border-cyan-500/40 shadow-sm shadow-cyan-500/10'
+                    : 'bg-slate-100 dark:bg-slate-900/50 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800 hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-200'
                 }`}
               >
                 {tab}
