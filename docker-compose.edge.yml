@@ -23,7 +23,8 @@ services:
   # Watchtower: Automated Over-The-Air (OTA) Pull-based Updater
   # ============================================================================
   watchtower:
-    image: containrrr/watchtower:latest
+    # Maintained fork; upstream containrrr/watchtower is incompatible with Docker Engine >= 29
+    image: nickfedor/watchtower:latest
     container_name: uav-watchtower
     restart: unless-stopped
     volumes:
