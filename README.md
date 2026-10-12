@@ -98,7 +98,7 @@ The UDP path holds up to about 100k msg/s. The single TimescaleDB node is the bo
 
 ## Running locally
 
-Requirements: Go 1.24+, Node 22+, Docker.
+Requirements: Go 1.27+, Node 22+, Docker.
 
 ```bash
 make db-up                         # TimescaleDB in Docker
